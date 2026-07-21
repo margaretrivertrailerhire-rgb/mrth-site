@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Margaret River Trailer Hire — Hydraulic tipper hire & materials delivery</title>
+<meta name="description" content="Hydraulic tipper trailer hire and materials delivery across the Margaret River region. Hire the trailer, tip it yourself, and pocket the difference." />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap');
+body{margin:0;}
+.mrth{
+  --charcoal:#1A1916; --steel:#26241F; --bone:#E9E5DC; --paper:#F2EFE8;
+  --rust:#BC4B23; --clay:#D98A3D; --euc:#234D2B; --muted:#8A857B; --line:rgba(26,25,22,.12);
+  font-family:'Archivo',system-ui,sans-serif; color:var(--charcoal); background:var(--paper);
+  -webkit-font-smoothing:antialiased; line-height:1.5; overflow-x:hidden;
+}
+.mrth *{box-sizing:border-box;}
+.mrth h1,.mrth h2,.mrth h3,.mrth .display{font-family:'Anton',sans-serif;font-weight:400;
+  text-transform:uppercase;letter-spacing:.01em;line-height:.95;margin:0;}
+.mrth p{margin:0;}
+.mrth svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 22px;}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:'Archivo';font-weight:700;
+  font-size:15px;letter-spacing:.02em;padding:14px 22px;border-radius:3px;border:2px solid transparent;
+  cursor:pointer;text-decoration:none;transition:transform .15s ease,background .15s ease,color .15s ease;}
+.btn:active{transform:translateY(1px);}
+.btn-sm{padding:9px 16px;font-size:13px;}
+.btn-rust{background:var(--rust);color:var(--paper);}
+.btn-rust:hover{background:#a23d18;}
+.btn-out{background:transparent;color:var(--paper);border-color:rgba(233,229,220,.4);}
+.btn-out:hover{border-color:var(--paper);}
+.btn-dark{background:var(--charcoal);color:var(--paper);}
+.btn-dark:hover{background:#000;}
+.mrth a:focus-visible,.mrth button:focus-visible{outline:3px solid var(--clay);outline-offset:2px;}
+
+.nav{position:sticky;top:0;z-index:20;background:var(--charcoal);border-bottom:1px solid rgba(255,255,255,.08);}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand{display:flex;align-items:center;gap:10px;color:var(--paper);text-decoration:none;}
+.brand .ico{color:var(--rust);}
+.brand .nm{font-family:'Anton';font-size:17px;letter-spacing:.02em;line-height:.9;}
+.brand .nm small{display:block;font-family:'Archivo';font-weight:600;font-size:9.5px;letter-spacing:.22em;color:var(--clay);}
+.navlinks{display:flex;align-items:center;gap:18px;}
+.navlinks a.nl{color:#cbc6bb;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:.02em;}
+.navlinks a.nl:hover{color:var(--paper);}
+.navlinks a.nl.active{color:var(--clay);}
+
+.hero{background:var(--charcoal);color:var(--bone);padding:60px 0 70px;position:relative;}
+.hero:before{content:"";position:absolute;inset:0;background:
+  repeating-linear-gradient(135deg,transparent 0 26px,rgba(188,75,35,.05) 26px 28px);pointer-events:none;}
+.hero .wrap{position:relative;}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:12px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--clay);margin-bottom:22px;}
+.eyebrow .bar{width:26px;height:2px;background:var(--rust);}
+.hero h1{font-size:clamp(46px,11vw,96px);}
+.hero h1 .strike{position:relative;color:var(--muted);}
+.hero h1 .strike:after{content:"";position:absolute;left:-2%;right:-2%;top:48%;height:7px;background:var(--rust);transform:rotate(-3deg);}
+.hero .sub{font-size:clamp(16px,2.4vw,20px);color:#cbc6bb;max-width:560px;margin:26px 0 32px;line-height:1.45;}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;}
+.trustline{display:flex;flex-wrap:wrap;gap:18px;margin-top:34px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);
+  font-size:13px;font-weight:600;color:#bdb8ad;}
+.trustline span{display:inline-flex;align-items:center;gap:7px;}
+.trustline .ic{color:var(--clay);}
+
+.calc{background:var(--bone);padding:64px 0;border-bottom:1px solid var(--line);}
+.calc .head{max-width:580px;margin-bottom:28px;}
+.calc h2{font-size:clamp(30px,5.5vw,46px);}
+.calc h2 em{font-style:normal;color:var(--rust);}
+.calc .lead{margin-top:14px;color:#4a463f;font-size:16px;}
+.ctrl-label{font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;}
+.jobs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px;}
+.job{font-family:'Archivo';font-weight:700;font-size:14px;padding:11px 18px;border-radius:3px;cursor:pointer;
+  background:transparent;border:2px solid var(--line);color:var(--charcoal);transition:all .15s ease;}
+.job:hover{border-color:var(--charcoal);}
+.job.on{background:var(--charcoal);color:var(--bone);border-color:var(--charcoal);}
+.job.green.on{background:var(--euc);border-color:var(--euc);}
+.compare{display:grid;grid-template-columns:1fr;gap:14px;margin-top:6px;}
+.card{border-radius:5px;padding:24px;border:1px solid var(--line);background:var(--paper);}
+.card .tag{font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.card .amt{font-family:'Anton';font-size:54px;line-height:1;margin:10px 0 4px;}
+.card .meta{font-size:13px;color:#5b564e;font-weight:600;}
+.card.skip{opacity:.82;}
+.card.skip .amt{color:#6f6a61;}
+.card.ours{background:var(--charcoal);border-color:var(--charcoal);color:var(--bone);}
+.card.ours .tag{color:var(--clay);}
+.card.ours .amt{color:var(--bone);}
+.card.ours .meta{color:#bdb8ad;}
+.save{margin-top:18px;background:var(--rust);color:var(--paper);border-radius:5px;padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.save .big{font-family:'Anton';font-size:clamp(34px,7vw,52px);line-height:.9;}
+.save .lbl{font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;}
+.note{margin-top:14px;font-size:13.5px;font-weight:600;color:var(--euc);display:flex;gap:8px;align-items:flex-start;}
+.note .ic{margin-top:1px;}
+.fineprint{font-size:12px;color:var(--muted);margin-top:10px;}
+
+.serv{padding:64px 0;}
+.serv h2{font-size:clamp(28px,5vw,42px);margin-bottom:8px;}
+.serv .intro{color:#4a463f;max-width:520px;margin-bottom:30px;}
+.grid2{display:grid;grid-template-columns:1fr;gap:18px;}
+.scard{border:1px solid var(--line);border-radius:6px;padding:30px;background:var(--bone);display:flex;flex-direction:column;}
+.scard .sic{width:46px;height:46px;border-radius:5px;display:grid;place-items:center;color:var(--paper);margin-bottom:18px;}
+.scard h3{font-size:24px;margin-bottom:10px;}
+.scard .price{font-family:'Anton';font-size:15px;color:var(--rust);letter-spacing:.04em;margin-bottom:10px;}
+.scard p{color:#4a463f;font-size:15px;margin-bottom:16px;}
+.scard ul{list-style:none;padding:0;margin:0 0 22px;display:flex;flex-direction:column;gap:9px;}
+.scard li{display:flex;gap:9px;font-size:14px;font-weight:500;align-items:flex-start;}
+.scard li .ck{color:var(--rust);margin-top:2px;}
+.scard .foot{margin-top:auto;}
+
+.area{background:var(--euc);color:var(--bone);padding:56px 0;}
+.area h2{font-size:clamp(26px,4.5vw,38px);margin-bottom:6px;}
+.area p{color:#cdd6cb;max-width:540px;margin-bottom:24px;}
+.towns{display:flex;flex-wrap:wrap;gap:10px;}
+.town{border:1px solid rgba(233,229,220,.28);border-radius:40px;padding:9px 16px;font-weight:600;font-size:14px;
+  display:inline-flex;align-items:center;gap:9px;}
+.town .fee{font-family:'Anton';font-size:14px;color:var(--clay);}
+
+.final{background:var(--charcoal);color:var(--bone);padding:64px 0;text-align:center;}
+.final h2{font-size:clamp(34px,7vw,64px);}
+.final p{color:#bdb8ad;margin:16px auto 28px;max-width:460px;}
+.final .cta-row{justify-content:center;}
+
+.foot{background:#121110;color:#8A857B;padding:30px 0;font-size:13px;}
+.foot .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;}
+.foot a{color:#bdb8ad;text-decoration:none;}
+
+@media(min-width:760px){
+  .compare{grid-template-columns:1fr 1fr;}
+  .grid2{grid-template-columns:1fr 1fr;}
+  .hero{padding:84px 0 90px;}
+  .save{padding:24px 32px;}
+}
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+</defs></svg>
+
+<div class="mrth">
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <svg class="ic ico" width="26" height="26"><use href="#i-truck"/></svg>
+        <div class="nm">Margaret River<small>Trailer Hire</small></div>
+      </a>
+      <div class="navlinks">
+        <a class="nl active" href="index.html">Home</a>
+        <a class="nl" href="trailer-hire.html">Trailer Hire</a>
+        <a class="nl" href="materials.html">Materials</a>
+        <a class="btn btn-rust btn-sm" href="book.html">Book now</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow"><span class="bar"></span> Load it. Tip it. Done.</div>
+      <h1>Skip the<br /><span class="strike">skip bin.</span></h1>
+      <p class="sub">Hydraulic tipper trailer hire and materials delivery across the Margaret River region. Hire the trailer, tip it yourself, and pocket the difference.</p>
+      <div class="cta-row">
+        <a class="btn btn-rust" href="book.html">Book a trailer <svg class="ic" width="17" height="17"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-out" href="book.html#materials">Order materials</a>
+      </div>
+      <div class="trustline">
+        <span><svg class="ic" width="15" height="15"><use href="#i-clock"/></svg> Same-week availability</span>
+        <span><svg class="ic" width="15" height="15"><use href="#i-pin"/></svg> Local owner-operator</span>
+        <span><svg class="ic" width="15" height="15"><use href="#i-leaf"/></svg> First 2m³ of green waste tips free</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="calc">
+    <div class="wrap">
+      <div class="head">
+        <h2>The real cost of a <em>tip run</em></h2>
+        <p class="lead">Honest maths: your trailer hire plus the actual Davis Road tip fee — against what a skip would cost.</p>
+      </div>
+
+      <p class="ctrl-label">What are you tipping?</p>
+      <div class="jobs">
+        <button class="job green on" data-waste="green">Green / garden waste</button>
+        <button class="job" data-waste="general">General / reno waste</button>
+      </div>
+
+      <p class="ctrl-label">Which trailer?</p>
+      <div class="jobs" id="trailerBtns"></div>
+
+      <div class="compare">
+        <div class="card skip">
+          <span class="tag">Skip bin</span>
+          <div class="amt" id="skipAmt">$520</div>
+          <div class="meta">Delivered &amp; collected · sits in your driveway · on their schedule</div>
+        </div>
+        <div class="card ours">
+          <span class="tag">Hire + tip it yourself</span>
+          <div class="amt" id="oursAmt">$235</div>
+          <div class="meta" id="oursMeta"></div>
+        </div>
+      </div>
+
+      <div class="save">
+        <div>
+          <div class="lbl">You keep roughly</div>
+          <div class="big" id="saveBig">$285</div>
+        </div>
+        <a class="btn btn-dark" href="book.html"><span id="bookLabel">Book the 10×6 Large</span> <svg class="ic" width="17" height="17"><use href="#i-arrow"/></svg></a>
+      </div>
+
+      <p class="note"><svg class="ic" width="16" height="16"><use href="#i-leaf"/></svg> <span id="noteText"></span></p>
+      <p class="fineprint">Trailer rates are our live May 2026 prices. Tip fees: Shire of Augusta Margaret River 2025–26 (Davis Road), residential. Skip figure indicative.</p>
+    </div>
+  </section>
+
+  <section class="serv">
+    <div class="wrap">
+      <h2>Two ways we help</h2>
+      <p class="intro">Whether you're clearing out or filling up, the tipper does the heavy lifting.</p>
+      <div class="grid2">
+        <div class="scard">
+          <div class="sic" style="background:var(--rust)"><svg class="ic" width="24" height="24"><use href="#i-truck"/></svg></div>
+          <h3>Trailer hire</h3>
+          <div class="price">From $150 / day</div>
+          <p>Three hydraulic tippers — 8×5, 10×5 and 10×6. Tip at the press of a button, no shovelling out.</p>
+          <ul>
+            <li><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Up to 5.5m³ — green waste, reno debris, dump runs</li>
+            <li><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Full day, multiple loads</li>
+            <li><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Tows easy, tips clean</li>
+          </ul>
+          <div class="foot"><a class="btn btn-dark" href="trailer-hire.html">Check availability</a></div>
+        </div>
+        <div class="scard">
+          <div class="sic" style="background:var(--euc)"><svg class="ic" width="24" height="24"><use href="#i-leaf"/></svg></div>
+          <h3>Materials delivery</h3>
+          <div class="price">Mulch from $110/m³ · delivery from $140</div>
+          <p>Mulch, soil, sand, gravel and stone — delivered and tipped where you want it.</p>
+          <ul>
+            <li><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Marri, pine bark, plantation mulch, soils &amp; sands</li>
+            <li><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> All-inclusive delivery — fuel levy absorbed</li>
+            <li><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Tipped on site (reversing access needed)</li>
+          </ul>
+          <div class="foot"><a class="btn btn-dark" href="materials.html">Get a quote</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="area">
+    <div class="wrap">
+      <h2>Where we run</h2>
+      <p>Based in Osmington, covering the Margaret River region. All-inclusive delivery fees — no surprise fuel surcharge. Further afield? Ask for a quote.</p>
+      <div class="towns" id="towns"></div>
+    </div>
+  </section>
+
+  <section class="final" id="book">
+    <div class="wrap">
+      <h2>Ready to load up?</h2>
+      <p>Check live availability and lock in a time, or message us and we'll sort it.</p>
+      <div class="cta-row">
+        <a class="btn btn-rust" href="#">Book now <svg class="ic" width="17" height="17"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-out" href="https://www.facebook.com/margaretrivertrailerhire"><svg class="ic" width="16" height="16"><use href="#i-msg"/></svg> Message on Facebook</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div>© 2026 Margaret River Trailer Hire · Osmington WA</div>
+      <a href="https://www.facebook.com/margaretrivertrailerhire">facebook.com/margaretrivertrailerhire</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ── Edit these to your live rates ───────────────────────────
+  var TRAILERS = [
+    { id: "8x5",  label: "8×5 Compact", capM3: 3.7, rate: 150, skip: 320 },
+    { id: "10x5", label: "10×5 Medium", capM3: 4.6, rate: 175, skip: 420 },
+    { id: "10x6", label: "10×6 Large",  capM3: 5.5, rate: 200, skip: 520 }
+  ];
+  var AREA = [
+    { town: "Margaret River", fee: 140 }, { town: "Cowaramup", fee: 140 },
+    { town: "Witchcliffe", fee: 175 },    { town: "Gracetown", fee: 175 },
+    { town: "Prevelly / Gnarabup", fee: 175 }, { town: "Wilyabrup", fee: 185 }
+  ];
+  function tipFee(waste, m3){
+    if (waste === "green") return Math.max(0, Math.round((m3 - 2) * 10)); // first 2m³ free, then $10/m³
+    return Math.round((m3 - 1) * 54); // general waste $54/m³ above 1m³
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  var waste = "green", active = "10x6";
+
+  // build trailer buttons
+  var tb = document.getElementById("trailerBtns");
+  TRAILERS.forEach(function(t){
+    var b = document.createElement("button");
+    b.className = "job" + (t.id === active ? " on" : "");
+    b.setAttribute("data-tid", t.id);
+    b.textContent = t.label;
+    b.addEventListener("click", function(){ active = t.id; render(); });
+    tb.appendChild(b);
+  });
+
+  // build town pills
+  var tw = document.getElementById("towns");
+  AREA.forEach(function(a){
+    var s = document.createElement("span");
+    s.className = "town";
+    s.innerHTML = '<svg class="ic" width="14" height="14"><use href="#i-pin"/></svg> ' + a.town + ' <span class="fee">$' + a.fee + '</span>';
+    tw.appendChild(s);
+  });
+
+  // waste toggle listeners
+  document.querySelectorAll("[data-waste]").forEach(function(b){
+    b.addEventListener("click", function(){ waste = b.getAttribute("data-waste"); render(); });
+  });
+
+  function render(){
+    var t = TRAILERS.find(function(x){ return x.id === active; });
+    var fee = tipFee(waste, t.capM3);
+    var total = t.rate + fee;
+    var saving = t.skip - total;
+    var feeText = fee === 0 ? "free" : "$" + fee;
+
+    document.getElementById("skipAmt").textContent = "$" + t.skip;
+    document.getElementById("oursAmt").textContent = "$" + total;
+    document.getElementById("oursMeta").textContent = "$" + t.rate + " " + t.label + " hire + " + feeText + " tip at Davis Road · " + t.capM3 + "m³";
+    document.getElementById("saveBig").textContent = "$" + saving;
+    document.getElementById("bookLabel").textContent = "Book the " + t.label;
+    document.getElementById("noteText").textContent = waste === "green"
+      ? "Green waste is where you win biggest — the first 2m³ tips free, then it's just $10/m³."
+      : "Mixed waste is dearer to tip ($54/m³), but you still set the schedule and run multiple loads in your day.";
+
+    document.querySelectorAll("[data-waste]").forEach(function(b){
+      b.classList.toggle("on", b.getAttribute("data-waste") === waste);
+    });
+    document.querySelectorAll("[data-tid]").forEach(function(b){
+      b.classList.toggle("on", b.getAttribute("data-tid") === active);
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>

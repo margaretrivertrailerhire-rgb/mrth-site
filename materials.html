@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Materials Delivery — Margaret River Trailer Hire</title>
+<meta name="description" content="Mulch, soil, sand, gravel and stone delivered across the Margaret River region. All-inclusive delivery, fuel levy absorbed." />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap');
+body{margin:0;}
+.mrth{--charcoal:#1A1916;--steel:#26241F;--bone:#E9E5DC;--paper:#F2EFE8;
+  --rust:#BC4B23;--clay:#D98A3D;--euc:#234D2B;--muted:#8A857B;--line:rgba(26,25,22,.12);
+  font-family:'Archivo',system-ui,sans-serif;color:var(--charcoal);background:var(--paper);
+  -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;}
+.mrth *{box-sizing:border-box;}
+.mrth h1,.mrth h2,.mrth h3,.display{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;line-height:.95;margin:0;}
+.mrth p{margin:0;}
+.mrth svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 22px;}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:'Archivo';font-weight:700;font-size:15px;letter-spacing:.02em;
+  padding:14px 22px;border-radius:3px;border:2px solid transparent;cursor:pointer;text-decoration:none;transition:transform .15s,background .15s,color .15s;}
+.btn:active{transform:translateY(1px);}
+.btn-sm{padding:9px 16px;font-size:13px;}
+.btn-rust{background:var(--rust);color:var(--paper);} .btn-rust:hover{background:#a23d18;}
+.btn-out{background:transparent;color:var(--paper);border-color:rgba(233,229,220,.4);} .btn-out:hover{border-color:var(--paper);}
+.btn-dark{background:var(--charcoal);color:var(--paper);} .btn-dark:hover{background:#000;}
+.btn-light{background:var(--paper);color:var(--charcoal);} .btn-light:hover{background:#fff;}
+.mrth a:focus-visible,.mrth button:focus-visible,.mrth select:focus-visible,.mrth input:focus-visible{outline:3px solid var(--clay);outline-offset:2px;}
+
+.nav{position:sticky;top:0;z-index:20;background:var(--charcoal);border-bottom:1px solid rgba(255,255,255,.08);}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand{display:flex;align-items:center;gap:10px;color:var(--paper);text-decoration:none;}
+.brand .ico{color:var(--rust);}
+.brand .nm{font-family:'Anton';font-size:17px;letter-spacing:.02em;line-height:.9;}
+.brand .nm small{display:block;font-family:'Archivo';font-weight:600;font-size:9.5px;letter-spacing:.22em;color:var(--clay);}
+.navlinks{display:flex;align-items:center;gap:18px;}
+.navlinks a.nl{color:#cbc6bb;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:.02em;}
+.navlinks a.nl:hover{color:var(--paper);}
+.navlinks a.nl.active{color:var(--clay);}
+
+.phero{background:var(--euc);color:var(--bone);padding:56px 0 50px;position:relative;}
+.phero .crumb{font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--clay);margin-bottom:18px;}
+.phero h1{font-size:clamp(40px,9vw,78px);}
+.phero .sub{font-size:clamp(16px,2.3vw,19px);color:#cdd6cb;max-width:560px;margin:22px 0 28px;}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;}
+.phero .btn-out{border-color:rgba(233,229,220,.45);}
+
+.est{padding:46px 0;background:var(--bone);border-bottom:1px solid var(--line);}
+.est h2{font-size:clamp(26px,4.6vw,38px);margin-bottom:6px;}
+.est .lead{color:#4a463f;margin-bottom:24px;max-width:520px;}
+.estbox{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:24px;}
+.fields{display:grid;grid-template-columns:1fr;gap:16px;}
+.field label{display:block;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.field select,.field input{width:100%;font-family:'Archivo';font-size:15px;font-weight:600;color:var(--charcoal);
+  background:var(--bone);border:2px solid var(--line);border-radius:4px;padding:12px 12px;appearance:none;}
+.field select:hover,.field input:hover{border-color:var(--charcoal);}
+.estout{margin-top:22px;border-top:2px dashed var(--line);padding-top:20px;}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;font-size:15px;color:#4a463f;}
+.line .lv{font-weight:700;color:var(--charcoal);}
+.line.tot{margin-top:8px;padding-top:14px;border-top:1px solid var(--line);}
+.line.tot .lk{font-family:'Anton';font-size:20px;text-transform:uppercase;}
+.line.tot .lv{font-family:'Anton';font-size:32px;color:var(--rust);}
+.estnote{font-size:12px;color:var(--muted);margin-top:14px;display:flex;gap:7px;align-items:flex-start;}
+.estnote .ic{flex-shrink:0;margin-top:1px;}
+.estbulk{margin-top:14px;background:var(--clay);color:var(--charcoal);border-radius:5px;padding:12px 14px;
+  font-size:13.5px;font-weight:700;display:flex;gap:8px;align-items:flex-start;line-height:1.4;}
+.estbulk .ic{flex-shrink:0;margin-top:1px;}
+.estbulk a{color:var(--charcoal);text-decoration:underline;}
+
+.zones{padding:50px 0;}
+.zones h2{font-size:clamp(24px,4.4vw,34px);margin-bottom:6px;}
+.zones .lead{color:#4a463f;max-width:560px;margin-bottom:22px;}
+.ztable{border:1px solid var(--line);border-radius:7px;overflow:hidden;}
+.zrow{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--bone);}
+.zrow:last-child{border-bottom:none;}
+.zrow .zn{font-weight:600;font-size:15px;}
+.zrow .zf{font-family:'Anton';font-size:18px;color:var(--euc);}
+.bulkcard{margin-top:16px;background:var(--charcoal);color:var(--bone);border-radius:8px;padding:24px;
+  display:flex;gap:18px;align-items:flex-start;border-left:5px solid var(--clay);}
+.bulkcard .bk-ic{width:50px;height:50px;border-radius:6px;background:var(--clay);color:var(--charcoal);
+  display:grid;place-items:center;flex-shrink:0;}
+.bulkcard .bk-body h3{font-family:'Anton';font-size:clamp(20px,3.2vw,26px);text-transform:uppercase;margin-bottom:9px;line-height:1.02;}
+.bulkcard .bk-body p{color:#cbc6bb;font-size:14.5px;margin-bottom:16px;}
+
+.board{padding:50px 0;background:var(--charcoal);color:var(--bone);}
+.board h2{font-size:clamp(26px,4.6vw,38px);margin-bottom:6px;}
+.board .lead{color:#bdb8ad;margin-bottom:28px;}
+.bgrid{display:grid;grid-template-columns:1fr;gap:18px;}
+.bcard{background:var(--steel);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:22px;}
+.bcard .bh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1);}
+.bcard .bh .bt{font-family:'Anton';font-size:22px;}
+.bcard .bh .bu{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--clay);}
+.brow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;font-size:14.5px;}
+.brow .bn{color:#e3ded4;font-weight:500;}
+.brow .bp{font-family:'Anton';font-size:16px;color:var(--bone);white-space:nowrap;}
+.brow .bp span{font-family:'Archivo';font-size:11px;font-weight:700;color:#9c978d;}
+
+.notes{padding:48px 0;}
+.notes h2{font-size:clamp(22px,4vw,30px);margin-bottom:18px;}
+.nlist{display:grid;grid-template-columns:1fr;gap:12px;}
+.nlist .ni{display:flex;gap:11px;font-size:15px;align-items:flex-start;color:#4a463f;}
+.nlist .ni .ck{color:var(--rust);flex-shrink:0;margin-top:2px;}
+
+.final{background:var(--rust);color:var(--paper);padding:56px 0;text-align:center;}
+.final h2{font-size:clamp(32px,6vw,54px);}
+.final p{margin:14px auto 26px;max-width:440px;color:#ffe9df;}
+.final .cta-row{justify-content:center;}
+.final .btn-out{border-color:rgba(255,255,255,.55);color:var(--paper);} .final .btn-out:hover{border-color:#fff;}
+
+.foot{background:#121110;color:#8A857B;padding:30px 0;font-size:13px;}
+.foot .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;}
+.foot a{color:#bdb8ad;text-decoration:none;}
+
+@media(min-width:760px){
+  .fields{grid-template-columns:2fr 1fr 1.4fr;align-items:end;}
+  .bgrid{grid-template-columns:1fr 1fr;}
+  .nlist{grid-template-columns:1fr 1fr;}
+  .phero{padding:74px 0 60px;}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</defs></svg>
+
+<div class="mrth">
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <svg class="ic ico" width="26" height="26"><use href="#i-truck"/></svg>
+        <div class="nm">Margaret River<small>Trailer Hire</small></div>
+      </a>
+      <div class="navlinks">
+        <a class="nl" href="index.html">Home</a>
+        <a class="nl" href="trailer-hire.html">Trailer Hire</a>
+        <a class="nl active" href="materials.html">Materials</a>
+        <a class="btn btn-rust btn-sm" href="#order">Order now</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="phero">
+    <div class="wrap">
+      <div class="crumb">Materials Delivery</div>
+      <h1>Tipped where<br />you want it.</h1>
+      <p class="sub">Mulch, soil, sand, gravel, stone and road base delivered across the region — from a single trailer load to bulk truck deliveries for the big jobs. All-inclusive delivery fees, with the fuel levy already absorbed, so the price you see is the price you pay.</p>
+      <div class="cta-row">
+        <a class="btn btn-rust" href="#estimator">Get an estimate <svg class="ic" width="17" height="17"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-out" href="#order">Order now</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="est" id="estimator">
+    <div class="wrap">
+      <h2>Estimate your order</h2>
+      <p class="lead">Pick a material, a quantity and your area. No surprises — delivery's already in the total.</p>
+      <div class="estbox">
+        <div class="fields">
+          <div class="field">
+            <label>Material</label>
+            <select id="matSel"></select>
+          </div>
+          <div class="field">
+            <label>Qty (<span id="qtyUnit">m³</span>)</label>
+            <input type="number" id="qtyInput" min="0" step="0.5" value="1" />
+          </div>
+          <div class="field">
+            <label>Delivery area</label>
+            <select id="zoneSel"></select>
+          </div>
+        </div>
+        <div class="estout">
+          <div class="line"><span class="lk" id="matLabel"></span><span class="lv" id="matVal"></span></div>
+          <div class="line"><span class="lk" id="delLabel"></span><span class="lv" id="delVal"></span></div>
+          <div class="line tot"><span class="lk">Estimated total</span><span class="lv" id="totVal"></span></div>
+          <div class="estbulk" id="bulkNudge" style="display:none">
+            <svg class="ic" width="16" height="16"><use href="#i-truck"/></svg>
+            <span>That's more than a single trailer load — we'll sort it as a truck delivery. <a href="#order">Ask for a bulk quote.</a></span>
+          </div>
+          <p class="estnote">
+            <svg class="ic" width="14" height="14"><use href="#i-info"/></svg>
+            Estimate only. Minimum 1 tonne delivery applies; heavy materials are limited to about 1–2T per load. Final price confirmed when you book.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zones">
+    <div class="wrap">
+      <h2>Delivery areas</h2>
+      <p class="lead">One flat, all-inclusive fee per area — the fuel levy is already built in, reviewed quarterly against diesel prices.</p>
+      <div class="ztable" id="ztable"></div>
+      <div class="bulkcard">
+        <div class="bk-ic"><svg class="ic" width="26" height="26"><use href="#i-truck"/></svg></div>
+        <div class="bk-body">
+          <h3>Bigger than a trailer load? We do truck delivery.</h3>
+          <p>Trailer drops suit most home jobs — about 1–2 tonne, or a few cubic metres, at a time. For whole-yard landscaping, building sites or a bulk mulch order, we arrange truck delivery for large orders in a single drop. Tell us the job and we'll quote it.</p>
+          <a class="btn btn-rust btn-sm" href="#order">Get a truck quote <svg class="ic" width="16" height="16"><use href="#i-arrow"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="board">
+    <div class="wrap">
+      <h2>Materials price list</h2>
+      <p class="lead">Everything we deliver, with the unit shown so there's no guesswork.</p>
+      <div class="bgrid" id="bgrid"></div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div class="wrap">
+      <h2>Good to know</h2>
+      <div class="nlist">
+        <div class="ni"><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Minimum 1 tonne delivery applies.</div>
+        <div class="ni"><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Heavy materials limited to ~1–2T per load (trailer capacity).</div>
+        <div class="ni"><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Delivery needs clear reversing access at the drop point.</div>
+        <div class="ni"><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Combo loads available on request — mix materials in one run.</div>
+        <div class="ni"><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Prices per m³ or per tonne as marked — check the unit before ordering.</div>
+        <div class="ni"><svg class="ic ck" width="17" height="17"><use href="#i-check"/></svg> Fuel levy already absorbed in the delivery fee — no surcharge on top.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final" id="order">
+    <div class="wrap">
+      <h2>Order materials</h2>
+      <p>Tell us what you need and where — we'll confirm the load and a delivery time.</p>
+      <div class="cta-row">
+        <a class="btn btn-light" href="book.html#materials">Start an order <svg class="ic" width="17" height="17"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-out" href="https://www.facebook.com/margaretrivertrailerhire"><svg class="ic" width="16" height="16"><use href="#i-msg"/></svg> Message on Facebook</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div>© 2026 Margaret River Trailer Hire · Osmington WA · Open 6am–6pm</div>
+      <a href="https://www.facebook.com/margaretrivertrailerhire">facebook.com/margaretrivertrailerhire</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ── PRICE DATA ─────────────────────────────────────────────
+  // To manage prices yourself, paste your Google Sheet feed URL below.
+  // Leave blank and the page uses the built-in list. If the feed is ever
+  // unreachable, it falls back to this list so the page never breaks.
+  var PRICING_URL = ""; // ← your Apps Script / published-CSV endpoint goes here
+
+  var FALLBACK_CATALOG = [
+    { cat:"Mulches", unit:"m³", items:[
+      {n:"Marri Chips",p:150},{n:"Pine Bark",p:150},{n:"Bushland",p:130},
+      {n:"Woodland Brown / Black",p:130},{n:"Karri & Peat",p:130},
+      {n:"Derby Brown",p:130},{n:"Plantation Mulch (Budget)",p:110}]},
+    { cat:"Soils", unit:"tonne", items:[
+      {n:"Vegie / Garden Blend",p:130},{n:"Soil Conditioner",p:125},
+      {n:"Landscape Blend",p:125},{n:"Lawn Blend",p:95},
+      {n:"Aged Horse Manure (12mth)",p:60,unit:"bucket"}]},
+    { cat:"Sands", unit:"tonne", items:[
+      {n:"Fill / House Pad Sand",p:55},{n:"Brickies Sand",p:80},
+      {n:"Grit Sand",p:85},{n:"Plasterers Sand",p:130},
+      {n:"Playground Sand",p:130},{n:"Screened Sand",p:50}]},
+    { cat:"Stones & Pebbles", unit:"m³", items:[
+      {n:"Fine River Gravel",p:500},{n:"Fine Rainbow Quartz",p:500},
+      {n:"Rainbow Quartz",p:480},{n:"Autumn Stone",p:460},
+      {n:"River Pebbles (20–40mm)",p:460},{n:"River Pebbles (40–90mm)",p:460},
+      {n:"Limestone Rubble",p:140},{n:"Cream Brick Rubble",p:230}]},
+    { cat:"Gravels & Road Base", unit:"m³", items:[
+      {n:"Cracked Gravel (5/12/18mm)",p:260},{n:"Filter Rock (19–25mm)",p:260},
+      {n:"Laterite Fines",p:240},{n:"MRD Gravel Road Base",p:54,unit:"tonne"},
+      {n:"MRD Limestone Road Base",p:56,unit:"tonne"}]},
+    { cat:"Blue Metals", unit:"m³", items:[
+      {n:"Blue Metal (10/14/20/50mm)",p:120},{n:"Blue Metal Road Base",p:90},
+      {n:"Cracker Dust & Rip Rap",p:90}]},
+    { cat:"Rocks", unit:"m³", items:[
+      {n:"Granite Rocks (various)",p:320},{n:"Ironstone Rock",p:80}]}
+  ];
+  var ZONES = [
+    {z:"Margaret River",fee:140},{z:"Cowaramup",fee:140},
+    {z:"Witchcliffe",fee:175},{z:"Gracetown",fee:175},
+    {z:"Prevelly / Gnarabup",fee:175},{z:"Wilyabrup",fee:185},
+    {z:"Further afield",fee:null}
+  ];
+  // ────────────────────────────────────────────────────────────
+
+  function buildFlat(catalog){
+    var flat = {};
+    catalog.forEach(function(c){ c.items.forEach(function(it){
+      flat[c.cat + "|" + it.n] = { n:it.n, p:it.p, cat:c.cat, unit:it.unit || c.unit };
+    }); });
+    return flat;
+  }
+
+  var catalog = FALLBACK_CATALOG;
+  var FLAT = buildFlat(catalog);
+
+  var matSel  = document.getElementById("matSel");
+  var zoneSel = document.getElementById("zoneSel");
+  var qtyInput= document.getElementById("qtyInput");
+
+  function renderSelect(){
+    matSel.innerHTML = "";
+    catalog.forEach(function(c){
+      var og = document.createElement("optgroup"); og.label = c.cat;
+      c.items.forEach(function(it){
+        var o = document.createElement("option");
+        o.value = c.cat + "|" + it.n; o.textContent = it.n;
+        og.appendChild(o);
+      });
+      matSel.appendChild(og);
+    });
+  }
+  function renderZoneSelect(){
+    zoneSel.innerHTML = "";
+    ZONES.forEach(function(z,i){
+      var o = document.createElement("option"); o.value = i; o.textContent = z.z;
+      zoneSel.appendChild(o);
+    });
+  }
+  function renderZoneTable(){
+    var zt = document.getElementById("ztable"); zt.innerHTML = "";
+    ZONES.filter(function(z){return z.fee !== null;}).forEach(function(z){
+      var r = document.createElement("div"); r.className = "zrow";
+      r.innerHTML = '<span class="zn">' + z.z + '</span><span class="zf">$' + z.fee + '</span>';
+      zt.appendChild(r);
+    });
+  }
+  function renderBoard(){
+    var bgrid = document.getElementById("bgrid"); bgrid.innerHTML = "";
+    catalog.forEach(function(c){
+      var card = document.createElement("div"); card.className = "bcard";
+      var rows = c.items.map(function(it){
+        var u = (it.unit && it.unit !== c.unit) ? ' <span>/' + it.unit + '</span>' : '';
+        return '<div class="brow"><span class="bn">' + it.n + '</span><span class="bp">$' + it.p + u + '</span></div>';
+      }).join("");
+      card.innerHTML = '<div class="bh"><span class="bt">' + c.cat + '</span><span class="bu">per ' + c.unit + '</span></div>' + rows;
+      bgrid.appendChild(card);
+    });
+  }
+  function updateEstimate(){
+    var key = matSel.value;
+    var item = FLAT[key] || Object.values(FLAT)[0];
+    var q = Number(qtyInput.value) > 0 ? Number(qtyInput.value) : 0;
+    var zone = ZONES[Number(zoneSel.value)];
+    var matCost = item.p * q;
+    var poa = zone.fee === null;
+    var total = poa ? null : matCost + zone.fee;
+    var bulky = (item.unit === "tonne" && q > 2) || (item.unit === "m³" && q > 5);
+
+    document.getElementById("qtyUnit").textContent = item.unit;
+    document.getElementById("matLabel").textContent = item.n + " — $" + item.p + "/" + item.unit + " × " + q;
+    document.getElementById("matVal").textContent = "$" + Math.round(matCost);
+    document.getElementById("delLabel").textContent = "Delivery — " + zone.z;
+    document.getElementById("delVal").textContent = poa ? "POA" : "$" + zone.fee;
+    document.getElementById("totVal").textContent = poa ? "Ask us" : "$" + Math.round(total);
+    document.getElementById("bulkNudge").style.display = bulky ? "flex" : "none";
+  }
+
+  // initial render
+  renderSelect(); renderZoneSelect(); renderZoneTable(); renderBoard(); updateEstimate();
+
+  matSel.addEventListener("change", updateEstimate);
+  zoneSel.addEventListener("change", updateEstimate);
+  qtyInput.addEventListener("input", updateEstimate);
+
+  // live pricing from your Google Sheet (if configured)
+  if (PRICING_URL) {
+    fetch(PRICING_URL)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (Array.isArray(data) && data.length) {
+          catalog = data; FLAT = buildFlat(catalog);
+          renderSelect(); renderBoard(); updateEstimate();
+        }
+      })
+      .catch(function(){}); // unreachable feed → keep built-in prices
+  }
+</script>
+</body>
+</html>

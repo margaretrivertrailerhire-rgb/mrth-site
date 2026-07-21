@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Book Now — Margaret River Trailer Hire</title>
+<meta name="description" content="Book a hydraulic tipper trailer or order materials delivery in the Margaret River region." />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap');
+body{margin:0;}
+.mrth{--charcoal:#1A1916;--steel:#26241F;--bone:#E9E5DC;--paper:#F2EFE8;
+  --rust:#BC4B23;--clay:#D98A3D;--euc:#234D2B;--muted:#8A857B;--line:rgba(26,25,22,.12);
+  font-family:'Archivo',system-ui,sans-serif;color:var(--charcoal);background:var(--paper);
+  -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;}
+.mrth *{box-sizing:border-box;}
+.mrth h1,.mrth h2,.mrth h3,.display{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;line-height:.95;margin:0;}
+.mrth p{margin:0;}
+.mrth svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.wrap{max-width:760px;margin:0 auto;padding:0 22px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Archivo';font-weight:700;font-size:15px;letter-spacing:.02em;
+  padding:14px 22px;border-radius:3px;border:2px solid transparent;cursor:pointer;text-decoration:none;transition:transform .15s,background .15s,color .15s,opacity .15s;}
+.btn:active{transform:translateY(1px);}
+.btn-sm{padding:9px 16px;font-size:13px;}
+.btn-rust{background:var(--rust);color:var(--paper);} .btn-rust:hover{background:#a23d18;}
+.btn-rust:disabled{opacity:.6;cursor:default;}
+.btn-out{background:transparent;color:var(--paper);border-color:rgba(233,229,220,.4);} .btn-out:hover{border-color:var(--paper);}
+.btn-dark{background:var(--charcoal);color:var(--paper);} .btn-dark:hover{background:#000;}
+.mrth a:focus-visible,.mrth button:focus-visible,.mrth select:focus-visible,.mrth input:focus-visible,.mrth textarea:focus-visible{outline:3px solid var(--clay);outline-offset:2px;}
+
+.nav{position:sticky;top:0;z-index:20;background:var(--charcoal);border-bottom:1px solid rgba(255,255,255,.08);}
+.nav .wrap{max-width:1100px;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand{display:flex;align-items:center;gap:10px;color:var(--paper);text-decoration:none;}
+.brand .ico{color:var(--rust);}
+.brand .nm{font-family:'Anton';font-size:17px;letter-spacing:.02em;line-height:.9;}
+.brand .nm small{display:block;font-family:'Archivo';font-weight:600;font-size:9.5px;letter-spacing:.22em;color:var(--clay);}
+.navlinks{display:flex;align-items:center;gap:18px;}
+.navlinks a.nl{color:#cbc6bb;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:.02em;}
+.navlinks a.nl:hover{color:var(--paper);}
+.navlinks a.nl.active{color:var(--clay);}
+
+.phero{background:var(--charcoal);color:var(--bone);padding:50px 0 44px;position:relative;}
+.phero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 26px,rgba(188,75,35,.05) 26px 28px);pointer-events:none;}
+.phero .wrap{position:relative;}
+.crumb{font-weight:700;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--clay);margin-bottom:16px;}
+.phero h1{font-size:clamp(38px,8vw,64px);}
+.phero .sub{font-size:clamp(15px,2.2vw,18px);color:#cbc6bb;max-width:520px;margin:18px 0 0;}
+
+.formsec{padding:40px 0 70px;}
+.toggle{display:flex;gap:10px;margin-bottom:28px;}
+.tbtn{flex:1;font-family:'Archivo';font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;
+  padding:14px;border-radius:5px;border:2px solid var(--line);background:var(--bone);color:var(--charcoal);cursor:pointer;transition:all .15s;}
+.tbtn.on{background:var(--charcoal);color:var(--bone);border-color:var(--charcoal);}
+
+.card{background:var(--bone);border:1px solid var(--line);border-radius:8px;padding:26px;}
+.fieldgrid{display:grid;grid-template-columns:1fr;gap:16px;}
+.field label{display:block;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.field .req{color:var(--rust);}
+.field select,.field input,.field textarea{width:100%;font-family:'Archivo';font-size:15px;font-weight:600;color:var(--charcoal);
+  background:var(--paper);border:2px solid var(--line);border-radius:4px;padding:12px;appearance:none;}
+.field textarea{font-weight:500;resize:vertical;min-height:90px;}
+.field select:hover,.field input:hover,.field textarea:hover{border-color:var(--charcoal);}
+.field.full{grid-column:1/-1;}
+.section-label{font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--euc);
+  margin:18px 0 4px;padding-top:14px;border-top:1px solid var(--line);}
+.actions{margin-top:24px;display:flex;flex-direction:column;gap:12px;}
+.statusmsg{font-size:14px;font-weight:600;padding:12px 14px;border-radius:5px;display:none;}
+.statusmsg.ok{display:block;background:var(--euc);color:var(--bone);}
+.statusmsg.err{display:block;background:var(--rust);color:var(--paper);}
+.altrow{font-size:13px;color:var(--muted);text-align:center;}
+.altrow a{color:var(--euc);font-weight:700;text-decoration:none;}
+
+.foot{background:#121110;color:#8A857B;padding:30px 0;font-size:13px;}
+.foot .wrap{max-width:1100px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;}
+.foot a{color:#bdb8ad;text-decoration:none;}
+
+@media(min-width:600px){
+  .fieldgrid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+</defs></svg>
+
+<div class="mrth">
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <svg class="ic ico" width="26" height="26"><use href="#i-truck"/></svg>
+        <div class="nm">Margaret River<small>Trailer Hire</small></div>
+      </a>
+      <div class="navlinks">
+        <a class="nl" href="index.html">Home</a>
+        <a class="nl" href="trailer-hire.html">Trailer Hire</a>
+        <a class="nl" href="materials.html">Materials</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="phero">
+    <div class="wrap">
+      <div class="crumb">Book Now</div>
+      <h1>Lock in your<br/>tipper or order.</h1>
+      <p class="sub">Fill in the details below — we'll confirm by phone or email and have everything ready.</p>
+    </div>
+  </section>
+
+  <section class="formsec">
+    <div class="wrap">
+      <div class="toggle">
+        <button class="tbtn on" id="btnTrailer" type="button">Trailer Hire</button>
+        <button class="tbtn" id="btnMaterials" type="button">Materials Order</button>
+      </div>
+
+      <form class="card" id="bookingForm">
+        <div class="fieldgrid">
+          <div class="field full">
+            <label>Name <span class="req">*</span></label>
+            <input type="text" name="Customer Name" required />
+          </div>
+          <div class="field">
+            <label>Phone <span class="req">*</span></label>
+            <input type="tel" name="Phone" required />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="Email" />
+          </div>
+
+          <!-- Trailer hire fields -->
+          <div class="field" data-group="trailer">
+            <label>Trailer <span class="req">*</span></label>
+            <select name="Trailer">
+              <option value="8×5 Compact">8×5 Compact ($150/day)</option>
+              <option value="10×5 Medium">10×5 Medium ($175/day)</option>
+              <option value="10×6 Large" selected>10×6 Large ($200/day)</option>
+            </select>
+          </div>
+          <div class="field" data-group="trailer"></div>
+          <div class="field" data-group="trailer">
+            <label>Start date <span class="req">*</span></label>
+            <input type="date" name="Start Date" />
+          </div>
+          <div class="field" data-group="trailer">
+            <label>End date <span class="req">*</span></label>
+            <input type="date" name="End Date" />
+          </div>
+
+          <!-- Materials order fields -->
+          <div class="field full" data-group="materials" style="display:none">
+            <label>Delivery date <span class="req">*</span></label>
+            <input type="date" name="Delivery Date" />
+          </div>
+
+          <div class="field full">
+            <label data-group="trailer">Notes (job details, address, access notes)</label>
+            <label data-group="materials" style="display:none">Order details (materials, quantities, delivery address, access notes) <span class="req">*</span></label>
+            <textarea name="Notes" placeholder="e.g. 2m³ Marri chips + 1T brickies sand, delivered to 12 Example Rd, Margaret River. Reversing access via driveway."></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <div class="statusmsg" id="statusMsg"></div>
+          <button class="btn btn-rust" id="submitBtn" type="submit">Submit request</button>
+          <p class="altrow">Prefer to chat first? <a href="https://www.facebook.com/margaretrivertrailerhire">Message us on Facebook</a></p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div>© 2026 Margaret River Trailer Hire · Osmington WA · Open 6am–6pm</div>
+      <a href="https://www.facebook.com/margaretrivertrailerhire">facebook.com/margaretrivertrailerhire</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ── Set this to your Apps Script Web App URL (see booking-submit.gs) ──
+  var BOOKING_URL = "https://script.google.com/macros/s/AKfycby0RQtb-3pP6df285Z93W-kztMcpLZqvW9UyR4wucvGnclIKCiAx9LzfoEEy5z67auD/exec";
+  // ────────────────────────────────────────────────────────────────────
+
+  var mode = "trailer"; // "trailer" | "materials"
+  var btnTrailer = document.getElementById("btnTrailer");
+  var btnMaterials = document.getElementById("btnMaterials");
+  var form = document.getElementById("bookingForm");
+  var statusMsg = document.getElementById("statusMsg");
+  var submitBtn = document.getElementById("submitBtn");
+
+  function applyMode(){
+    var isTrailer = mode === "trailer";
+    btnTrailer.classList.toggle("on", isTrailer);
+    btnMaterials.classList.toggle("on", !isTrailer);
+
+    document.querySelectorAll('[data-group="trailer"]').forEach(function(el){
+      el.style.display = isTrailer ? "" : "none";
+    });
+    document.querySelectorAll('[data-group="materials"]').forEach(function(el){
+      el.style.display = isTrailer ? "none" : "";
+    });
+
+    // required toggling
+    form.querySelector('[name="Trailer"]').required = isTrailer;
+    form.querySelector('[name="Start Date"]').required = isTrailer;
+    form.querySelector('[name="End Date"]').required = isTrailer;
+    form.querySelector('[name="Delivery Date"]').required = !isTrailer;
+    form.querySelector('[name="Notes"]').required = !isTrailer;
+  }
+
+  btnTrailer.addEventListener("click", function(){ mode = "trailer"; applyMode(); });
+  btnMaterials.addEventListener("click", function(){ mode = "materials"; applyMode(); });
+  if (window.location.hash === "#materials") { mode = "materials"; }
+  applyMode();
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    statusMsg.className = "statusmsg";
+    statusMsg.textContent = "";
+
+    if (!BOOKING_URL) {
+      statusMsg.className = "statusmsg err";
+      statusMsg.textContent = "Booking form isn't connected yet — please message us on Facebook for now.";
+      return;
+    }
+
+    var fd = new FormData(form);
+    var data = {
+      "Customer Name": fd.get("Customer Name") || "",
+      "Phone": fd.get("Phone") || "",
+      "Email": fd.get("Email") || "",
+      "Notes": fd.get("Notes") || "",
+      "Hire Type": mode === "trailer" ? "Trailer Hire" : "Materials Order",
+      "Trailer": mode === "trailer" ? (fd.get("Trailer") || "") : "",
+      "Start Date": mode === "trailer" ? (fd.get("Start Date") || "") : (fd.get("Delivery Date") || ""),
+      "End Date": mode === "trailer" ? (fd.get("End Date") || "") : ""
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+
+    fetch(BOOKING_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" }, // avoids CORS preflight to Apps Script
+      body: JSON.stringify(data)
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res && res.ok) {
+          statusMsg.className = "statusmsg ok";
+          statusMsg.textContent = "Thanks — your request has been sent. We'll be in touch to confirm.";
+          form.reset();
+          applyMode();
+        } else {
+          throw new Error("bad response");
+        }
+      })
+      .catch(function(){
+        statusMsg.className = "statusmsg err";
+        statusMsg.textContent = "Something went wrong sending that. Please try again, or message us on Facebook.";
+      })
+      .finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit request";
+      });
+  });
+</script>
+</body>
+</html>

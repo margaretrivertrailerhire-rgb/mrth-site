@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landscape Supplies Delivered — Margaret River to Augusta | MRTH</title>
+<meta name="description" content="Mulch, soil, sand, gravel and stone delivered across the Margaret River region — Cowaramup to Augusta. Get a fast quote from Margaret River Trailer Hire.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1A1A;
+    --orange:#E8651A;
+    --grey-mid:#2E2E2E;
+    --grey-dark:#262626;
+    --divider:#3A3A3A;
+    --soft:#CCCCCC;
+    --gravel:#9a9a9a;
+    --white:#FFFFFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+  body{font-family:'Barlow',system-ui,sans-serif;color:var(--white);background:var(--bg);line-height:1.55;font-size:17px}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  a{color:var(--orange)}
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+  /* header */
+  header{background:var(--bg)}
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 0;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--divider)}
+  .brand{font-family:'Barlow Condensed';font-weight:700;font-size:1.35rem;letter-spacing:.04em;text-transform:uppercase;color:var(--white);text-decoration:none}
+  .brand span{color:var(--orange)}
+  nav a{color:var(--white);text-decoration:none;margin-left:18px;font-weight:500;font-size:.95rem}
+  nav a:hover{color:var(--orange)}
+
+  /* hero */
+  .hero{background:var(--bg);color:var(--white);padding:44px 0 56px;border-bottom:6px solid var(--orange)}
+  .hero h1{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(2.2rem,6vw,3.6rem);line-height:1.05;max-width:16ch}
+  .hero h1 em{font-style:normal;color:var(--orange)}
+  .hero p{margin-top:14px;max-width:52ch;font-size:1.1rem;color:var(--soft)}
+  .hero .cta-row{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap}
+  .btn{display:inline-block;font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:1.05rem;padding:13px 26px;border-radius:4px;text-decoration:none;border:2px solid transparent;cursor:pointer}
+  .btn-amber{background:var(--orange);color:#1A1A1A}
+  .btn-amber:hover{background:#ff7526}
+  .btn-ghost{border-color:var(--white);color:var(--white)}
+  .btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+  /* sections */
+  section{padding:52px 0}
+  .eyebrow{font-family:'Barlow Condensed';font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);font-size:.95rem}
+  h2{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;font-size:clamp(1.6rem,4vw,2.2rem);margin:4px 0 18px;color:var(--white)}
+
+  /* how it works */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:8px}
+  .step{border:1px solid var(--divider);border-top:4px solid var(--orange);background:var(--grey-dark);padding:18px;border-radius:4px;color:var(--soft)}
+  .step b{font-family:'Barlow Condensed';text-transform:uppercase;font-size:1.15rem;letter-spacing:.03em;display:block;margin-bottom:6px;color:var(--white)}
+
+  /* price board — matches the price guide */
+  .board{background:var(--grey-dark);color:var(--soft);border-radius:6px;padding:30px 26px;border:1px solid var(--divider);border-top:6px solid var(--orange)}
+  .board h2{color:var(--white);margin-bottom:4px}
+  .board .note{color:var(--gravel);font-size:.92rem;margin-bottom:20px}
+  .board h3{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.08em;color:var(--orange);font-size:1.1rem;margin:22px 0 8px;border-bottom:1px solid var(--divider);padding-bottom:4px}
+  .board ul{list-style:none}
+  .board li{display:flex;align-items:baseline;gap:8px;padding:3.5px 0;font-size:.98rem}
+  .board li .m{white-space:nowrap;color:var(--soft)}
+  .board li .dots{flex:1;border-bottom:2px dotted var(--divider);transform:translateY(-4px)}
+  .board li .p{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--white)}
+  .board-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));column-gap:40px}
+
+  /* zones */
+  .zones table{width:100%;border-collapse:collapse;background:var(--grey-dark);border:1px solid var(--divider)}
+  .zones th,.zones td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--divider)}
+  .zones th{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.06em;background:var(--orange);color:#1A1A1A;font-weight:700}
+  .zones tr:nth-child(even) td{background:var(--grey-mid)}
+  .zones td{color:var(--soft)}
+  .zones td:last-child{font-weight:600;white-space:nowrap;color:var(--white)}
+  .zones .poa td{color:var(--gravel)}
+  .zones .poa td:last-child{color:var(--gravel);font-weight:500}
+
+  /* quote form */
+  .quote{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);border-radius:4px;padding:28px 24px;max-width:640px}
+  .quote label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px;color:var(--white)}
+  .quote input,.quote select,.quote textarea{width:100%;padding:11px 12px;border:1px solid var(--divider);border-radius:4px;font:inherit;background:var(--grey-mid);color:var(--white)}
+  .quote input::placeholder,.quote textarea::placeholder{color:var(--gravel)}
+  .quote textarea{min-height:80px}
+  .quote .hint{font-size:.85rem;color:var(--gravel);margin-top:3px}
+  .quote button{margin-top:20px;width:100%}
+  #formMsg{margin-top:14px;font-weight:600;display:none}
+
+  /* trailer hire strip */
+  .hire{background:var(--orange);color:#1A1A1A}
+  .hire h2{color:#1A1A1A}
+  .hire p{max-width:60ch;color:#1A1A1A}
+  .hire .btn{margin-top:18px;background:#1A1A1A;color:var(--white)}
+  .hire .btn:hover{background:#000}
+
+  footer{background:#141414;color:var(--gravel);padding:26px 0;font-size:.9rem;border-top:1px solid var(--divider)}
+  footer a{color:var(--soft)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap topbar">
+    <a class="brand" href="/">Margaret River <span>Trailer Hire</span></a>
+    <nav>
+      <a href="#prices">Prices</a>
+      <a href="#zones">Delivery</a>
+      <a href="#quote">Get a quote</a>
+      <a href="/trailer-hire.html">Trailer hire</a>
+    </nav>
+  </div>
+  <div class="hero">
+    <div class="wrap">
+      <h1>Mulch, soil, sand &amp; gravel — <em>delivered to your place.</em></h1>
+      <p><strong style="color:var(--orange)">Load it. Tip it. Done.</strong> Landscape and building materials tipped where you want them, anywhere from Cowaramup to Augusta. Local, owner-run, and quoted fast — one message, sorted.</p>
+      <div class="cta-row">
+        <a class="btn btn-amber" href="#quote">Get a delivery quote</a>
+        <a class="btn btn-ghost" href="#prices">See prices</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Three steps, no phone tag</h2>
+    <div class="steps">
+      <div class="step"><b>1 — Tell us the job</b>Material, roughly how much, and your suburb. Use the quote form below — takes a minute.</div>
+      <div class="step"><b>2 — Get your price</b>One all-in price: materials plus delivery. No fuel levies or surprises on the day.</div>
+      <div class="step"><b>3 — We deliver &amp; tip</b>Tipped where you direct it. Mark the spot and you don't even need to be home.</div>
+    </div>
+  </div>
+</section>
+
+<section id="prices">
+  <div class="wrap">
+    <div class="board">
+      <p class="eyebrow">Price board</p>
+      <h2>Materials</h2>
+      <p class="note">Delivery charged by suburb — see the zone table below. Larger truck-load quantities quoted on request.</p>
+      <div class="board-grid">
+        <div>
+          <h3>Mulch — per m³</h3>
+          <ul>
+            <li><span class="m">Marri Chips</span><span class="dots"></span><span class="p">$150</span></li>
+            <li><span class="m">Pine Bark</span><span class="dots"></span><span class="p">$150</span></li>
+            <li><span class="m">Bushland</span><span class="dots"></span><span class="p">$130</span></li>
+            <li><span class="m">Woodland Brown / Black</span><span class="dots"></span><span class="p">$130</span></li>
+            <li><span class="m">Karri &amp; Peat</span><span class="dots"></span><span class="p">$130</span></li>
+            <li><span class="m">Derby Brown</span><span class="dots"></span><span class="p">$130</span></li>
+            <li><span class="m">Plantation (budget)</span><span class="dots"></span><span class="p">$110</span></li>
+          </ul>
+          <h3>Soils — per m³</h3>
+          <ul>
+            <li><span class="m">Vegie / Garden Blend</span><span class="dots"></span><span class="p">$130</span></li>
+            <li><span class="m">Soil Conditioner</span><span class="dots"></span><span class="p">$125</span></li>
+            <li><span class="m">Landscape Blend</span><span class="dots"></span><span class="p">$125</span></li>
+            <li><span class="m">Lawn Blend</span><span class="dots"></span><span class="p">$95</span></li>
+            <li><span class="m">Aged Horse Manure</span><span class="dots"></span><span class="p">$60 /bucket</span></li>
+          </ul>
+          <h3>Sands — per tonne</h3>
+          <ul>
+            <li><span class="m">Fill / House Pad Sand</span><span class="dots"></span><span class="p">$55</span></li>
+            <li><span class="m">Screened Sand</span><span class="dots"></span><span class="p">$50</span></li>
+            <li><span class="m">Brickies Sand</span><span class="dots"></span><span class="p">$80</span></li>
+            <li><span class="m">Grit Sand</span><span class="dots"></span><span class="p">$85</span></li>
+            <li><span class="m">Plasterers Sand</span><span class="dots"></span><span class="p">$130</span></li>
+            <li><span class="m">Playground Sand</span><span class="dots"></span><span class="p">$130</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Stone &amp; pebbles — per m³</h3>
+          <ul>
+            <li><span class="m">Fine River Gravel</span><span class="dots"></span><span class="p">$500</span></li>
+            <li><span class="m">Fine Rainbow Quartz</span><span class="dots"></span><span class="p">$500</span></li>
+            <li><span class="m">Rainbow Quartz</span><span class="dots"></span><span class="p">$480</span></li>
+            <li><span class="m">Autumn Stone</span><span class="dots"></span><span class="p">$460</span></li>
+            <li><span class="m">River Pebbles 20–40mm</span><span class="dots"></span><span class="p">$460</span></li>
+            <li><span class="m">River Pebbles 40–90mm</span><span class="dots"></span><span class="p">$460</span></li>
+            <li><span class="m">Cream Brick Rubble</span><span class="dots"></span><span class="p">$230</span></li>
+            <li><span class="m">Limestone Rubble</span><span class="dots"></span><span class="p">$140</span></li>
+          </ul>
+          <h3>Gravel &amp; road base</h3>
+          <ul>
+            <li><span class="m">Cracked Gravel 5/12/18mm</span><span class="dots"></span><span class="p">$260 /m³</span></li>
+            <li><span class="m">Filter Rock 19–25mm</span><span class="dots"></span><span class="p">$260 /m³</span></li>
+            <li><span class="m">Laterite Fines</span><span class="dots"></span><span class="p">$240 /m³</span></li>
+            <li><span class="m">MRD Gravel Road Base</span><span class="dots"></span><span class="p">$54 /t</span></li>
+            <li><span class="m">MRD Limestone Road Base</span><span class="dots"></span><span class="p">$56 /t</span></li>
+          </ul>
+          <h3>Blue metal — per tonne</h3>
+          <ul>
+            <li><span class="m">Blue Metal 10–50mm</span><span class="dots"></span><span class="p">$120</span></li>
+            <li><span class="m">Blue Metal Road Base</span><span class="dots"></span><span class="p">$90</span></li>
+            <li><span class="m">Cracker Dust / Rip Rap</span><span class="dots"></span><span class="p">$90</span></li>
+          </ul>
+          <h3>Rock — per tonne</h3>
+          <ul>
+            <li><span class="m">Granite Rock (various)</span><span class="dots"></span><span class="p">$320</span></li>
+            <li><span class="m">Ironstone Rock</span><span class="dots"></span><span class="p">$80</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="zones" class="zones">
+  <div class="wrap">
+    <p class="eyebrow">Where we deliver</p>
+    <h2>Delivery fees by suburb</h2>
+    <p style="margin:-6px 0 14px;font-size:.95rem">Fees below are per <strong>trailer load</strong> — up to about 5.5&nbsp;m³ of mulch or 2&nbsp;tonnes of heavy material per trip. Perfect for most gardens. Need more? Truck-load delivery is quoted on request — often cheaper per tonne for big jobs.</p>
+    <table>
+      <tr><th>Suburb</th><th>Trailer-load delivery</th></tr>
+      <tr><td>Margaret River &amp; Osmington</td><td>$140</td></tr>
+      <tr><td>Cowaramup</td><td>$140</td></tr>
+      <tr><td>Witchcliffe</td><td>$175</td></tr>
+      <tr><td>Gracetown</td><td>$175</td></tr>
+      <tr><td>Prevelly &amp; Gnarabup</td><td>$175</td></tr>
+      <tr><td>Wilyabrup</td><td>$185</td></tr>
+      <tr class="poa"><td>Karridale, Augusta, Forest Grove, Rosa Brook, Nannup &amp; beyond</td><td>Quoted on request</td></tr>
+      <tr class="poa"><td>Truck loads (any suburb) — over 5.5&nbsp;m³ or 2&nbsp;tonnes</td><td>Quoted on request</td></tr>
+    </table>
+    <p style="margin-top:12px;font-size:.92rem;color:var(--gravel)">Trailer fees are all-inclusive — fuel is built in. One fee covers a combo load (mixed materials, one trip). Delivery needs reversing access and firm ground. Minimum 1 tonne per delivery. Orders over the trailer limit are quoted as a truck load rather than charged multiple trips — usually the cheaper way.</p>
+  </div>
+</section>
+
+<section id="quote">
+  <div class="wrap">
+    <p class="eyebrow">Get a price</p>
+    <h2>Quote in a few hours, usually faster</h2>
+    <div class="quote">
+      <form id="quoteForm">
+        <label for="qName">Name</label>
+        <input id="qName" name="name" required autocomplete="name">
+
+        <label for="qPhone">Mobile</label>
+        <input id="qPhone" name="phone" type="tel" required autocomplete="tel">
+
+        <label for="qEmail">Email <span style="font-weight:400;color:var(--gravel)">(optional)</span></label>
+        <input id="qEmail" name="email" type="email" autocomplete="email">
+
+        <label for="qMaterial">Material</label>
+        <input id="qMaterial" name="material" required placeholder="e.g. Pine bark mulch, lawn blend soil">
+
+        <label for="qQty">Roughly how much?</label>
+        <input id="qQty" name="quantity" required placeholder="e.g. 4 cubic metres, 2 tonnes, or the area to cover">
+        <p class="hint">Not sure? Tell us the area (e.g. 6m × 4m garden bed) and we'll work it out.</p>
+
+        <label for="qSuburb">Delivery suburb</label>
+        <input id="qSuburb" name="suburb" required placeholder="e.g. Witchcliffe">
+
+        <label for="qWhen">When do you need it?</label>
+        <select id="qWhen" name="timeframe">
+          <option>This week</option>
+          <option>Next week</option>
+          <option>Within a month</option>
+          <option>Just pricing for now</option>
+        </select>
+
+        <label for="qAccess">Access notes <span style="font-weight:400;color:var(--gravel)">(optional)</span></label>
+        <textarea id="qAccess" name="access" placeholder="Gates, tight driveway, where you'd like it tipped…"></textarea>
+
+        <button type="submit" class="btn btn-amber">Send quote request</button>
+        <p id="formMsg"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="hire">
+  <div class="wrap">
+    <p class="eyebrow" style="color:rgba(26,26,26,.75)">Prefer to do it yourself?</p>
+    <h2>Hydraulic tipper trailer hire</h2>
+    <p>Hire a hydraulic tipper for tip runs, green waste and small loads — 8×5 from $150/day, 10×5 $175, 10×6 $200. A trailer plus tip fees runs around $235 all-up — less than half the cost of a typical skip bin, and you're done the same day.</p>
+    <a class="btn btn-amber" href="/trailer-hire.html">Trailer hire rates &amp; bookings</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong style="color:#fff">Margaret River Trailer Hire</strong> — Osmington WA. Locally owned and operated. margaretrivertrailerhire.com.au</p>
+    <p style="margin-top:6px">Call or text: <a href="tel:+61429016758">0429 016 758</a> · <a href="https://www.facebook.com/margaretrivertrailerhire">Facebook</a></p>
+  </div>
+</footer>
+
+<script>
+// Point this at your existing Google Apps Script web app URL (the one writing to the Bookings sheet).
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymLPArTEY2fjTY9d52IlWD7SUfWsVH0itlVFjV5JEjSWtgPUUd341DWDjxKB2ImpTz/exec";
+
+document.getElementById('quoteForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const msg = document.getElementById('formMsg');
+  const btn = this.querySelector('button');
+  const data = Object.fromEntries(new FormData(this).entries());
+  data.enquiryType = "Materials delivery";      // lets your sheet separate delivery vs hire
+  data.submitted = new Date().toISOString();
+  btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    await fetch(APPS_SCRIPT_URL, { method:"POST", mode:"no-cors",
+      headers:{ "Content-Type":"text/plain" }, body: JSON.stringify(data) });
+    msg.style.display = "block"; msg.style.color = "#E8651A";
+    msg.textContent = "Sent — we'll text you a price shortly.";
+    this.reset();
+  } catch(err) {
+    msg.style.display = "block"; msg.style.color = "#ff7a6b";
+    msg.textContent = "That didn't send. Please text us the details instead on 0429 016 758.";
+  }
+  btn.disabled = false; btn.textContent = "Send quote request";
+});
+</script>
+</body>
+</html>
