@@ -80,6 +80,27 @@
   .zones .poa td:last-child{color:var(--gravel);font-weight:500}
 
 
+
+  /* trust strip */
+  .trust{background:var(--grey-dark);border-bottom:1px solid var(--divider);padding:18px 0}
+  .trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;text-align:center}
+  @media (max-width:640px){.trust-grid{grid-template-columns:repeat(2,1fr);gap:18px}}
+  .trust-item{font-size:.88rem;color:var(--soft);line-height:1.35}
+  .trust-item b{display:block;font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.05em;
+    font-size:1.05rem;color:var(--orange);margin-bottom:2px}
+
+  /* reviews */
+  .reviews{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);
+    border-radius:4px;padding:26px 22px;max-width:640px;text-align:center}
+  .stars{font-size:1.6rem;letter-spacing:.12em;color:var(--orange);line-height:1}
+  .reviews .rline{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.05em;
+    font-size:1.25rem;color:var(--white);margin-top:8px}
+  .reviews .rsub{font-size:.92rem;color:var(--soft);margin-top:6px;max-width:44ch;margin-left:auto;margin-right:auto}
+  .rbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .rbtn{display:inline-block;padding:10px 18px;border:1px solid var(--divider);border-radius:4px;
+    background:var(--grey-mid);color:var(--white);text-decoration:none;font-weight:600;font-size:.9rem}
+  .rbtn:hover{border-color:var(--orange);color:var(--orange)}
+
   /* quantity calculator */
   .calc{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);border-radius:4px;padding:26px 22px;max-width:640px}
   .calc label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px;color:var(--white)}
@@ -144,6 +165,15 @@
     </div>
   </div>
 </header>
+
+<div class="trust">
+  <div class="wrap trust-grid">
+    <div class="trust-item"><b>★★★★★</b>Rated on Google &amp; Facebook</div>
+    <div class="trust-item"><b>Local</b>Owner-run from Osmington</div>
+    <div class="trust-item"><b>All-in price</b>Materials + delivery, fuel included</div>
+    <div class="trust-item"><b>Tipped to spot</b>Where you want it, not the kerb</div>
+  </div>
+</div>
 
 <section>
   <div class="wrap">
@@ -294,6 +324,22 @@
       <div id="cOut" class="calc-out" aria-live="polite"></div>
 
       <button type="button" id="cUse" class="btn btn-amber" style="display:none;width:100%;margin-top:16px">Use this in my quote →</button>
+    </div>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="wrap">
+    <p class="eyebrow">What locals say</p>
+    <h2>Rated five stars</h2>
+    <div class="reviews">
+      <div class="stars">★★★★★</div>
+      <p class="rline">5-star rated on Google &amp; Facebook</p>
+      <p class="rsub">We're a small local operation — every job matters, and we'd rather do it properly than quickly.</p>
+      <div class="rbtns">
+        <a class="rbtn" href="https://g.page/r/CaYV_-uiUviZEAE/review" target="_blank" rel="noopener">Read our Google reviews →</a>
+        <a class="rbtn" href="https://www.facebook.com/margaretrivertrailerhire" target="_blank" rel="noopener">See us on Facebook →</a>
+      </div>
     </div>
   </div>
 </section>

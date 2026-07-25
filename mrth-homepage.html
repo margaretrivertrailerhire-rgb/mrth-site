@@ -79,6 +79,47 @@
   .zones .poa td{color:var(--gravel)}
   .zones .poa td:last-child{color:var(--gravel);font-weight:500}
 
+
+
+  /* trust strip */
+  .trust{background:var(--grey-dark);border-bottom:1px solid var(--divider);padding:18px 0}
+  .trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;text-align:center}
+  @media (max-width:640px){.trust-grid{grid-template-columns:repeat(2,1fr);gap:18px}}
+  .trust-item{font-size:.88rem;color:var(--soft);line-height:1.35}
+  .trust-item b{display:block;font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.05em;
+    font-size:1.05rem;color:var(--orange);margin-bottom:2px}
+
+  /* reviews */
+  .reviews{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);
+    border-radius:4px;padding:26px 22px;max-width:640px;text-align:center}
+  .stars{font-size:1.6rem;letter-spacing:.12em;color:var(--orange);line-height:1}
+  .reviews .rline{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.05em;
+    font-size:1.25rem;color:var(--white);margin-top:8px}
+  .reviews .rsub{font-size:.92rem;color:var(--soft);margin-top:6px;max-width:44ch;margin-left:auto;margin-right:auto}
+  .rbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .rbtn{display:inline-block;padding:10px 18px;border:1px solid var(--divider);border-radius:4px;
+    background:var(--grey-mid);color:var(--white);text-decoration:none;font-weight:600;font-size:.9rem}
+  .rbtn:hover{border-color:var(--orange);color:var(--orange)}
+
+  /* quantity calculator */
+  .calc{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);border-radius:4px;padding:26px 22px;max-width:640px}
+  .calc label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px;color:var(--white)}
+  .calc input,.calc select{width:100%;padding:11px 12px;border:1px solid var(--divider);border-radius:4px;font:inherit;background:var(--grey-mid);color:var(--white)}
+  .calc input::placeholder{color:var(--gravel)}
+  .calc .hint{font-size:.85rem;color:var(--gravel);margin-top:6px}
+  .calc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .calc-grid2{display:grid;grid-template-columns:1fr 1.3fr;gap:10px}
+  @media (max-width:480px){.calc-grid{grid-template-columns:1fr 1fr}}
+  .calc-toggle{display:flex;gap:8px;margin:18px 0 4px}
+  .tog{flex:1;padding:10px;border:1px solid var(--divider);background:var(--grey-mid);color:var(--soft);border-radius:4px;font:inherit;font-weight:600;font-size:.9rem;cursor:pointer}
+  .tog.active{background:var(--orange);color:#1A1A1A;border-color:var(--orange)}
+  .calc-out{margin-top:20px;padding:18px;background:var(--bg);border:1px solid var(--divider);border-left:4px solid var(--orange);border-radius:4px;display:none}
+  .calc-out.show{display:block}
+  .calc-out .big{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;font-size:1.5rem;color:var(--orange);line-height:1.2}
+  .calc-out .sub{font-size:.95rem;color:var(--soft);margin-top:6px}
+  .calc-out .cost{font-size:1.15rem;font-weight:600;color:var(--white);margin-top:12px}
+  .calc-out .cav{font-size:.82rem;color:var(--gravel);margin-top:12px;line-height:1.45}
+
   /* quote form */
   .quote{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);border-radius:4px;padding:28px 24px;max-width:640px}
   .quote label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px;color:var(--white)}
@@ -107,6 +148,7 @@
     <a class="brand" href="/">Margaret River <span>Trailer Hire</span></a>
     <nav>
       <a href="#prices">Prices</a>
+      <a href="#calc">Calculator</a>
       <a href="#zones">Delivery</a>
       <a href="#quote">Get a quote</a>
       <a href="/trailer-hire.html">Trailer hire</a>
@@ -123,6 +165,15 @@
     </div>
   </div>
 </header>
+
+<div class="trust">
+  <div class="wrap trust-grid">
+    <div class="trust-item"><b>★★★★★</b>Rated on Google &amp; Facebook</div>
+    <div class="trust-item"><b>Local</b>Owner-run from Osmington</div>
+    <div class="trust-item"><b>All-in price</b>Materials + delivery, fuel included</div>
+    <div class="trust-item"><b>Tipped to spot</b>Where you want it, not the kerb</div>
+  </div>
+</div>
 
 <section>
   <div class="wrap">
@@ -229,6 +280,70 @@
   </div>
 </section>
 
+<section id="calc">
+  <div class="wrap">
+    <p class="eyebrow">Work it out yourself</p>
+    <h2>How much do I need?</h2>
+    <p style="margin:-6px 0 18px;max-width:60ch;color:var(--soft)">Enter your garden bed or area and we'll do the maths — then send it straight to a quote.</p>
+
+    <div class="calc">
+      <label for="cMat">What material?</label>
+      <select id="cMat"></select>
+
+      <div class="calc-toggle">
+        <button type="button" class="tog active" data-mode="area">Measure an area</button>
+        <button type="button" class="tog" data-mode="direct">I know the amount</button>
+      </div>
+
+      <div id="areaMode">
+        <div class="calc-grid">
+          <div>
+            <label for="cLen">Length (m)</label>
+            <input id="cLen" type="number" inputmode="decimal" min="0" step="0.1" placeholder="6">
+          </div>
+          <div>
+            <label for="cWid">Width (m)</label>
+            <input id="cWid" type="number" inputmode="decimal" min="0" step="0.1" placeholder="4">
+          </div>
+          <div>
+            <label for="cDep">Depth (mm)</label>
+            <input id="cDep" type="number" inputmode="numeric" min="0" step="5" placeholder="75">
+          </div>
+        </div>
+        <p class="hint" id="depHint">Typical mulch depth is 75mm. Garden soil 100–150mm. Road base 100mm.</p>
+      </div>
+
+      <div id="directMode" style="display:none">
+        <label for="cQty">How much do you need?</label>
+        <div class="calc-grid2">
+          <input id="cQty" type="number" inputmode="decimal" min="0" step="0.5" placeholder="4">
+          <select id="cUnit"><option value="m3">cubic metres (m³)</option><option value="t">tonnes</option></select>
+        </div>
+      </div>
+
+      <div id="cOut" class="calc-out" aria-live="polite"></div>
+
+      <button type="button" id="cUse" class="btn btn-amber" style="display:none;width:100%;margin-top:16px">Use this in my quote →</button>
+    </div>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="wrap">
+    <p class="eyebrow">What locals say</p>
+    <h2>Rated five stars</h2>
+    <div class="reviews">
+      <div class="stars">★★★★★</div>
+      <p class="rline">5-star rated on Google &amp; Facebook</p>
+      <p class="rsub">We're a small local operation — every job matters, and we'd rather do it properly than quickly.</p>
+      <div class="rbtns">
+        <a class="rbtn" href="GOOGLE_REVIEW_LINK_HERE" target="_blank" rel="noopener">Read our Google reviews →</a>
+        <a class="rbtn" href="https://www.facebook.com/margaretrivertrailerhire" target="_blank" rel="noopener">See us on Facebook →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="quote">
   <div class="wrap">
     <p class="eyebrow">Get a price</p>
@@ -284,13 +399,164 @@
 <footer>
   <div class="wrap">
     <p><strong style="color:#fff">Margaret River Trailer Hire</strong> — Osmington WA. Locally owned and operated. margaretrivertrailerhire.com.au</p>
-    <p style="margin-top:6px">Call or text: <a href="tel:+61XXXXXXXXX">04XX XXX XXX</a> · <a href="https://www.facebook.com/margaretrivertrailerhire">Facebook</a></p>
+    <p style="margin-top:6px">Call or text: <a href="tel:+61429016758">0429 016 758</a> · <a href="https://www.facebook.com/margaretrivertrailerhire">Facebook</a></p>
   </div>
 </footer>
 
 <script>
+
+// ---------- Quantity & cost calculator ----------
+// Prices: MRTH July 2026 guide. t/m3 factors are approximate loose densities.
+const MATERIALS = {
+  "Mulch (per m³)": [
+    ["Marri Chips", 150, "m3", null, 75],
+    ["Pine Bark", 150, "m3", null, 75],
+    ["Bushland", 130, "m3", null, 75],
+    ["Woodland Brown / Black", 130, "m3", null, 75],
+    ["Karri & Peat", 130, "m3", null, 75],
+    ["Derby Brown", 130, "m3", null, 75],
+    ["Plantation Mulch (budget)", 110, "m3", null, 75]
+  ],
+  "Soils (per m³)": [
+    ["Vegie / Garden Blend", 130, "m3", null, 150],
+    ["Soil Conditioner", 125, "m3", null, 100],
+    ["Landscape Blend", 125, "m3", null, 100],
+    ["Lawn Blend", 95, "m3", null, 100]
+  ],
+  "Sands (per tonne)": [
+    ["Screened Sand", 50, "t", 1.5, 100],
+    ["Fill / House Pad Sand", 55, "t", 1.5, 100],
+    ["Brickies Sand", 80, "t", 1.5, 50],
+    ["Grit Sand", 85, "t", 1.5, 50],
+    ["Plasterers Sand", 130, "t", 1.5, 50],
+    ["Playground Sand", 130, "t", 1.5, 200]
+  ],
+  "Stones & Pebbles (per m³)": [
+    ["Fine River Gravel", 500, "m3", null, 50],
+    ["Fine Rainbow Quartz", 500, "m3", null, 50],
+    ["Rainbow Quartz", 480, "m3", null, 50],
+    ["Autumn Stone", 460, "m3", null, 50],
+    ["River Pebbles 20–40mm", 460, "m3", null, 50],
+    ["River Pebbles 40–90mm", 460, "m3", null, 50],
+    ["Cream Brick Rubble", 230, "m3", null, 100],
+    ["Limestone Rubble", 140, "m3", null, 100]
+  ],
+  "Gravels & Road Base": [
+    ["Cracked Gravel 5/12/18mm", 260, "m3", null, 100],
+    ["Filter Rock 19–25mm", 260, "m3", null, 100],
+    ["Laterite Fines", 240, "m3", null, 100],
+    ["MRD Gravel Road Base", 54, "t", 1.8, 100],
+    ["MRD Limestone Road Base", 56, "t", 1.8, 100]
+  ],
+  "Blue Metals (per tonne)": [
+    ["Blue Metal 10/14/20/50mm", 120, "t", 1.5, 75],
+    ["Blue Metal Road Base", 90, "t", 1.8, 100],
+    ["Cracker Dust / Rip Rap", 90, "t", 1.5, 75]
+  ],
+  "Rocks (per tonne)": [
+    ["Granite Rock (various)", 320, "t", 1.5, 100],
+    ["Ironstone Rock", 80, "t", 1.5, 100]
+  ]
+};
+
+(function(){
+  const sel = document.getElementById('cMat');
+  if(!sel) return;
+  Object.keys(MATERIALS).forEach(group => {
+    const og = document.createElement('optgroup');
+    og.label = group;
+    MATERIALS[group].forEach(m => {
+      const o = document.createElement('option');
+      o.value = m[0]; o.textContent = m[0];
+      o.dataset.price = m[1]; o.dataset.unit = m[2];
+      o.dataset.dens = m[3] === null ? '' : m[3];
+      o.dataset.depth = m[4];
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+
+  const len=document.getElementById('cLen'), wid=document.getElementById('cWid'),
+        dep=document.getElementById('cDep'), qty=document.getElementById('cQty'),
+        unit=document.getElementById('cUnit'), out=document.getElementById('cOut'),
+        useBtn=document.getElementById('cUse'), depHint=document.getElementById('depHint');
+  let mode = 'area';
+
+  document.querySelectorAll('.tog').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tog').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    mode = b.dataset.mode;
+    document.getElementById('areaMode').style.display = mode === 'area' ? '' : 'none';
+    document.getElementById('directMode').style.display = mode === 'direct' ? '' : 'none';
+    calc();
+  }));
+
+  function money(n){ return '$' + Math.round(n).toLocaleString('en-AU'); }
+
+  function calc(){
+    const o = sel.options[sel.selectedIndex];
+    if(!o){ return; }
+    const price = +o.dataset.price, munit = o.dataset.unit;
+    const dens = o.dataset.dens ? +o.dataset.dens : null;
+    let m3 = 0, tonnes = 0;
+
+    if(mode === 'area'){
+      const L = +len.value, W = +wid.value, D = +dep.value;
+      if(!(L>0 && W>0 && D>0)){ out.classList.remove('show'); useBtn.style.display='none'; return; }
+      m3 = L * W * (D/1000);
+      if(dens) tonnes = m3 * dens;
+    } else {
+      const q = +qty.value;
+      if(!(q>0)){ out.classList.remove('show'); useBtn.style.display='none'; return; }
+      if(unit.value === 'm3'){ m3 = q; if(dens) tonnes = q * dens; }
+      else { tonnes = q; m3 = dens ? q / dens : q; }
+    }
+
+    const billQty = (munit === 't') ? tonnes : m3;
+    const cost = billQty * price;
+
+    let head = m3.toFixed(1) + ' m³';
+    if(dens) head += ' ≈ ' + tonnes.toFixed(1) + ' tonnes';
+
+    let warn = '';
+    if(munit === 't' && tonnes < 1) warn = '<div class="cav">⚠ Minimum 1 tonne per delivery — we\'ll quote you for 1 tonne.</div>';
+    if(m3 > 5.5) warn += '<div class="cav">📦 That\'s more than a trailer load — this one goes out by truck. Usually cheaper per tonne than multiple trailer trips.</div>';
+
+    out.innerHTML =
+      '<div class="big">' + head + '</div>' +
+      '<div class="sub">' + o.value + '</div>' +
+      '<div class="cost">Materials: about ' + money(cost) + '</div>' +
+      warn +
+      '<div class="cav">Estimate only — delivery is quoted separately based on your suburb and load size. Send it through below and we\'ll come back with one all-in price.</div>';
+    out.classList.add('show');
+    useBtn.style.display = '';
+    useBtn.dataset.material = o.value;
+    useBtn.dataset.qty = (munit === 't')
+      ? Math.max(1, +tonnes.toFixed(1)) + ' tonnes'
+      : (+m3.toFixed(1)) + ' m³';
+  }
+
+  sel.addEventListener('change', () => {
+    const o = sel.options[sel.selectedIndex];
+    if(o && !dep.value) dep.placeholder = o.dataset.depth;
+    depHint.textContent = 'Suggested depth for ' + o.value + ': about ' + o.dataset.depth + 'mm.';
+    calc();
+  });
+  [len,wid,dep,qty,unit].forEach(el => el && el.addEventListener('input', calc));
+
+  useBtn.addEventListener('click', () => {
+    const mEl = document.getElementById('qMaterial'), qEl = document.getElementById('qQty');
+    if(mEl) mEl.value = useBtn.dataset.material;
+    if(qEl) qEl.value = useBtn.dataset.qty;
+    document.getElementById('quote').scrollIntoView({behavior:'smooth'});
+    setTimeout(() => { const n = document.getElementById('qName'); if(n) n.focus(); }, 600);
+  });
+
+  sel.dispatchEvent(new Event('change'));
+})();
+
 // Point this at your existing Google Apps Script web app URL (the one writing to the Bookings sheet).
-const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymLPArTEY2fjTY9d52IlWD7SUfWsVH0itlVFjV5JEjSWtgPUUd341DWDjxKB2ImpTz/exec";
 
 document.getElementById('quoteForm').addEventListener('submit', async function(e){
   e.preventDefault();
@@ -308,7 +574,7 @@ document.getElementById('quoteForm').addEventListener('submit', async function(e
     this.reset();
   } catch(err) {
     msg.style.display = "block"; msg.style.color = "#ff7a6b";
-    msg.textContent = "That didn't send. Please text us the details instead on 04XX XXX XXX.";
+    msg.textContent = "That didn't send. Please text us the details instead on 0429 016 758.";
   }
   btn.disabled = false; btn.textContent = "Send quote request";
 });
