@@ -69,6 +69,21 @@
   .board li .p{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--white)}
   .board-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));column-gap:40px}
 
+
+  /* material gallery */
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .gtile{background:var(--grey-dark);border:1px solid var(--divider);border-radius:5px;overflow:hidden}
+  .gtile img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--grey-mid)}
+  .gtile .cap{padding:9px 10px}
+  .gtile .nm{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.03em;
+    font-weight:700;font-size:1rem;color:var(--white);line-height:1.15}
+  .gtile .pr{font-size:.85rem;color:var(--orange);font-weight:600;margin-top:2px}
+
+
+  .gal-cat{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+    font-size:1.15rem;color:var(--orange);margin:26px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--divider)}
+  .gal-cat:first-of-type{margin-top:6px}
+
   /* zones */
   .zones table{width:100%;border-collapse:collapse;background:var(--grey-dark);border:1px solid var(--divider)}
   .zones th,.zones td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--divider)}
@@ -148,6 +163,7 @@
     <a class="brand" href="/">Margaret River <span>Trailer Hire</span></a>
     <nav>
       <a href="#prices">Prices</a>
+      <a href="#gallery">Photos</a>
       <a href="#calc">Calculator</a>
       <a href="#zones">Delivery</a>
       <a href="#quote">Get a quote</a>
@@ -260,6 +276,133 @@
   </div>
 </section>
 
+<section id="gallery">
+  <div class="wrap">
+    <p class="eyebrow">Up close</p>
+    <h2>See what you're getting</h2>
+    <p style="margin:-6px 0 4px;max-width:60ch;color:var(--soft)">Real photos from the yard — hand in shot so you can judge the size. Natural products vary a little batch to batch.</p>
+      <h3 class="gal-cat">Mulch — per m³</h3>
+      <div class="gal">
+        <div class="gtile">
+          <img src="/img/mulch-marri-chips.jpg" alt="Marri Chips — coarse pale marri wood chip" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Marri Chips</div><div class="pr">$150</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/mulch-pine-bark.jpg" alt="Pine Bark — chunky red-brown pine bark" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Pine Bark</div><div class="pr">$150</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/mulch-bushland.jpg" alt="Bushland — coarse mixed brown wood chip" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Bushland</div><div class="pr">$130</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/mulch-woodland-brown.jpg" alt="Woodland Brown — chunky red-brown coloured chip" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Woodland Brown</div><div class="pr">$130</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/mulch-woodland-black.jpg" alt="Woodland Black — black coloured wood chip" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Woodland Black</div><div class="pr">$130</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/mulch-karri-peat.jpg" alt="Karri & Peat — fine dark karri and peat blend" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Karri & Peat</div><div class="pr">$130</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/mulch-derby-brown.jpg" alt="Derby Brown — fine dark brown shredded mulch" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Derby Brown</div><div class="pr">$130</div></div>
+        </div>
+      </div>
+      <h3 class="gal-cat">Soils — per m³</h3>
+      <div class="gal">
+        <div class="gtile">
+          <img src="/img/soil-garden-blend.jpg" alt="Vegie / Garden Blend — dark rich garden soil blend" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Vegie / Garden Blend</div><div class="pr">$130</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/soil-conditioner.jpg" alt="Soil Conditioner — dark fine soil conditioner" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Soil Conditioner</div><div class="pr">$125</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/soil-landscape-blend.jpg" alt="Landscape Mix — dark landscape soil mix" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Landscape Mix</div><div class="pr">$125</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/soil-lawn-blend.jpg" alt="Lawn Blend — sandy brown lawn soil blend" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Lawn Blend</div><div class="pr">$95</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/soil-petrichor-compost.jpg" alt="Petrichor Compost — dark compost with pale organic matter" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Petrichor Compost</div><div class="pr">POA</div></div>
+        </div>
+      </div>
+      <h3 class="gal-cat">Sands — per tonne</h3>
+      <div class="gal">
+        <div class="gtile">
+          <img src="/img/sand-brickies.jpg" alt="Brickie Sand — orange-yellow bricklaying sand" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Brickie Sand</div><div class="pr">$80</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/sand-plasterers.jpg" alt="Plasterers Sand — fine yellow plastering sand" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Plasterers Sand</div><div class="pr">$130</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/sand-playground.jpg" alt="Playground Sand — pale washed playground sand" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Playground Sand</div><div class="pr">$130</div></div>
+        </div>
+      </div>
+      <h3 class="gal-cat">Stones &amp; Pebbles — per m³</h3>
+      <div class="gal">
+        <div class="gtile">
+          <img src="/img/stone-fine-river-gravel.jpg" alt="Fine River Gravel — small white and pink river gravel" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Fine River Gravel</div><div class="pr">$500</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/stone-river-pebbles-20-40.jpg" alt="River Pebbles 20–40mm — rounded pink and grey river pebbles" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">River Pebbles 20–40mm</div><div class="pr">$460</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/stone-river-pebbles-40-90.jpg" alt="River Pebbles 40–90mm — large rounded river pebbles" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">River Pebbles 40–90mm</div><div class="pr">$460</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/stone-cream-brick-rubble.jpg" alt="Cream Brick Rubble — crushed cream coloured brick" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Cream Brick Rubble</div><div class="pr">$230</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/stone-limestone-rubble.jpg" alt="Limestone Rubble — chunky white limestone rubble" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Limestone Rubble</div><div class="pr">$140</div></div>
+        </div>
+      </div>
+      <h3 class="gal-cat">Gravels &amp; Road Base</h3>
+      <div class="gal">
+        <div class="gtile">
+          <img src="/img/gravel-cracked-12mm.jpg" alt="Cracked Gravel 12mm — angular orange cracked gravel" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Cracked Gravel 12mm</div><div class="pr">$260 / m³</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/gravel-laterite-fines.jpg" alt="Laterite Fines — fine red laterite" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Laterite Fines</div><div class="pr">$240 / m³</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/gravel-mrd-spec.jpg" alt="MRD Spec. Gravel Road Base — tan gravel road base" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">MRD Spec. Gravel Road Base</div><div class="pr">$54 / t</div></div>
+        </div>
+        <div class="gtile">
+          <img src="/img/gravel-pea.jpg" alt="Pea Gravel — rounded tan pea gravel" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Pea Gravel</div><div class="pr">POA</div></div>
+        </div>
+      </div>
+      <h3 class="gal-cat">Blue Metal — per tonne</h3>
+      <div class="gal">
+        <div class="gtile">
+          <img src="/img/bluemetal-10mm.jpg" alt="Blue Metal 10mm — grey angular crushed blue metal" loading="lazy" width="600" height="600">
+          <div class="cap"><div class="nm">Blue Metal 10mm</div><div class="pr">$120</div></div>
+        </div>
+      </div>
+    <p style="margin-top:18px;font-size:.9rem;color:var(--gravel)">Working through the rest of the range now — message us and we'll send a photo of anything you don't see here.</p>
+  </div>
+</section>
+
 <section id="zones" class="zones">
   <div class="wrap">
     <p class="eyebrow">Where we deliver</p>
@@ -337,7 +480,7 @@
       <p class="rline">5-star rated on Google &amp; Facebook</p>
       <p class="rsub">We're a small local operation — every job matters, and we'd rather do it properly than quickly.</p>
       <div class="rbtns">
-        <a class="rbtn" href="https://g.page/r/CaYV_-uiUviZEAE/review" target="_blank" rel="noopener">Read our Google reviews →</a>
+        <a class="rbtn" href="https://g.page/r/CaYV_-uiUviZEAE/review" target="_blank" rel="noopener">Leave us a Google review →</a>
         <a class="rbtn" href="https://www.facebook.com/margaretrivertrailerhire" target="_blank" rel="noopener">See us on Facebook →</a>
       </div>
     </div>
