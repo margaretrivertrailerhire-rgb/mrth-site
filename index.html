@@ -166,6 +166,20 @@
   .hire-save .big{font-family:'Barlow Condensed';font-weight:700;font-size:2rem;color:var(--orange);line-height:1}
   @media (min-width:600px){.hire-compare{grid-template-columns:1fr 1fr}}
 
+  /* trailer rate cards */
+  .trate-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:20px;max-width:640px}
+  .trate-card{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);border-radius:4px;padding:20px 20px 18px}
+  .trate-card h3{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--white);font-size:1.2rem;margin-bottom:10px}
+  .trate-card .cap{display:flex;align-items:baseline;gap:8px;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--divider);font-size:.95rem}
+  .trate-card .cap .m{color:var(--gravel);white-space:nowrap}
+  .trate-card .cap .dots{flex:1;border-bottom:2px dotted var(--divider);transform:translateY(-4px)}
+  .trate-card .cap .p{font-weight:600;color:var(--soft);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .trate-card .day{font-family:'Barlow Condensed';font-weight:700;font-size:2rem;color:var(--orange);line-height:1}
+  .trate-card .day span{font-family:'Barlow';font-weight:500;font-size:.85rem;color:var(--gravel);text-transform:none;letter-spacing:0;margin-left:3px}
+  .trate-card .wknd{font-size:.85rem;color:var(--gravel);margin-top:4px}
+  .trate-note{font-size:.92rem;color:var(--gravel);margin:2px 0 22px;max-width:60ch}
+  @media (min-width:700px){.trate-grid{grid-template-columns:repeat(3,1fr)}}
+
   footer{background:#141414;color:var(--gravel);padding:26px 0;font-size:.9rem;border-top:1px solid var(--divider)}
   footer a{color:var(--soft)}
 </style>
@@ -549,6 +563,28 @@
     <p class="eyebrow">Prefer to do it yourself?</p>
     <h2>Hydraulic tipper trailer hire</h2>
     <p style="margin:-6px 0 18px;max-width:60ch;color:var(--soft)">Hire a hydraulic tipper for tip runs, green waste and small loads — tip at the press of a button, no shovelling out. See how much you'd save over a skip bin below.</p>
+
+    <div class="trate-grid">
+      <div class="trate-card">
+        <h3>8×5 Compact</h3>
+        <p class="cap"><span class="m">Capacity</span><span class="dots"></span><span class="p">3.7m³ / 2.4T</span></p>
+        <div class="day">$150<span>/day</span></div>
+        <div class="wknd">$225/weekend</div>
+      </div>
+      <div class="trate-card">
+        <h3>10×5 Medium</h3>
+        <p class="cap"><span class="m">Capacity</span><span class="dots"></span><span class="p">4.6m³ / 2.2T</span></p>
+        <div class="day">$175<span>/day</span></div>
+        <div class="wknd">$275/weekend</div>
+      </div>
+      <div class="trate-card">
+        <h3>10×6 Large</h3>
+        <p class="cap"><span class="m">Capacity</span><span class="dots"></span><span class="p">5.5m³ / 2.2T</span></p>
+        <div class="day">$200<span>/day</span></div>
+        <div class="wknd">$300/weekend</div>
+      </div>
+    </div>
+    <p class="trate-note">The 8×5 carries the most weight — best for sand, gravel and blue metal.</p>
 
     <div class="hirecalc">
       <p class="ctrl-label">What are you tipping?</p>
