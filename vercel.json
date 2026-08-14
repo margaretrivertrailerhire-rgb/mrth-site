@@ -1,0 +1,8 @@
+{
+  "redirects": [
+    { "source": "/trailer-hire.html", "destination": "/#hire", "permanent": true },
+    { "source": "/trailer-hire", "destination": "/#hire", "permanent": true },
+    { "source": "/materials.html", "destination": "/#prices", "permanent": true },
+    { "source": "/materials", "destination": "/#prices", "permanent": true }
+  ]
+}

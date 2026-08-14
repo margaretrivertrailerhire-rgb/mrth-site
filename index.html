@@ -145,12 +145,26 @@
   .quote button{margin-top:20px;width:100%}
   #formMsg{margin-top:14px;font-weight:600;display:none}
 
-  /* trailer hire strip */
-  .hire{background:var(--orange);color:#1A1A1A}
-  .hire h2{color:#1A1A1A}
-  .hire p{max-width:60ch;color:#1A1A1A}
-  .hire .btn{margin-top:18px;background:#1A1A1A;color:var(--white)}
-  .hire .btn:hover{background:#000}
+  /* trailer hire calculator */
+  .hirecalc{background:var(--bg);border:1px solid var(--divider);border-top:6px solid var(--orange);border-radius:4px;padding:26px 22px;max-width:640px}
+  .hirecalc .ctrl-label{font-weight:600;font-size:.92rem;margin:14px 0 8px;color:var(--white)}
+  .hirecalc .ctrl-label:first-child{margin-top:0}
+  .hire-toggle{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .htog{flex:1;min-width:120px;padding:10px;border:1px solid var(--divider);background:var(--grey-mid);color:var(--soft);border-radius:4px;font:inherit;font-weight:600;font-size:.9rem;cursor:pointer}
+  .htog.active{background:var(--orange);color:#1A1A1A;border-color:var(--orange)}
+  .hire-compare{display:grid;grid-template-columns:1fr;gap:12px;margin-top:18px}
+  .hcard{border-radius:4px;padding:18px;border:1px solid var(--divider);background:var(--grey-dark)}
+  .hcard .tag{font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gravel)}
+  .hcard .amt{font-family:'Barlow Condensed';font-weight:700;font-size:2.4rem;line-height:1;margin:8px 0 4px;color:var(--white)}
+  .hcard .meta{font-size:.85rem;color:var(--gravel)}
+  .hcard.ours{background:var(--orange);border-color:var(--orange)}
+  .hcard.ours .tag{color:rgba(26,26,26,.7)}
+  .hcard.ours .amt{color:#1A1A1A}
+  .hcard.ours .meta{color:rgba(26,26,26,.75)}
+  .hire-save{margin-top:16px;background:var(--grey-mid);border:1px solid var(--divider);border-radius:4px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .hire-save .lbl{font-weight:600;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gravel)}
+  .hire-save .big{font-family:'Barlow Condensed';font-weight:700;font-size:2rem;color:var(--orange);line-height:1}
+  @media (min-width:600px){.hire-compare{grid-template-columns:1fr 1fr}}
 
   footer{background:#141414;color:var(--gravel);padding:26px 0;font-size:.9rem;border-top:1px solid var(--divider)}
   footer a{color:var(--soft)}
@@ -167,7 +181,7 @@
       <a href="#calc">Calculator</a>
       <a href="#zones">Delivery</a>
       <a href="#quote">Get a quote</a>
-      <a href="/trailer-hire.html">Trailer hire</a>
+      <a href="#hire">Trailer hire</a>
     </nav>
   </div>
   <div class="hero">
@@ -530,12 +544,46 @@
   </div>
 </section>
 
-<section class="hire">
+<section id="hire">
   <div class="wrap">
-    <p class="eyebrow" style="color:rgba(26,26,26,.75)">Prefer to do it yourself?</p>
+    <p class="eyebrow">Prefer to do it yourself?</p>
     <h2>Hydraulic tipper trailer hire</h2>
-    <p>Hire a hydraulic tipper for tip runs, green waste and small loads — 8×5 from $150/day, 10×5 $175, 10×6 $200. A trailer plus tip fees runs around $235 all-up — less than half the cost of a typical skip bin, and you're done the same day.</p>
-    <a class="btn btn-amber" href="/trailer-hire.html">Trailer hire rates &amp; bookings</a>
+    <p style="margin:-6px 0 18px;max-width:60ch;color:var(--soft)">Hire a hydraulic tipper for tip runs, green waste and small loads — tip at the press of a button, no shovelling out. See how much you'd save over a skip bin below.</p>
+
+    <div class="hirecalc">
+      <p class="ctrl-label">What are you tipping?</p>
+      <div class="hire-toggle">
+        <button type="button" class="htog active" data-waste="green">Green / garden waste</button>
+        <button type="button" class="htog" data-waste="general">General / reno waste</button>
+      </div>
+
+      <p class="ctrl-label">Which trailer?</p>
+      <div class="hire-toggle" id="trailerBtns"></div>
+
+      <div class="hire-compare">
+        <div class="hcard skip">
+          <span class="tag">Skip bin</span>
+          <div class="amt" id="skipAmt">$520</div>
+          <div class="meta">Delivered &amp; collected · sits in your driveway · on their schedule</div>
+        </div>
+        <div class="hcard ours">
+          <span class="tag">Hire + tip it yourself</span>
+          <div class="amt" id="oursAmt">$235</div>
+          <div class="meta" id="oursMeta"></div>
+        </div>
+      </div>
+
+      <div class="hire-save">
+        <div>
+          <div class="lbl">You keep roughly</div>
+          <div class="big" id="saveBig">$285</div>
+        </div>
+        <a class="btn btn-amber" href="book.html"><span id="bookLabel">Book the 10×6 Large</span></a>
+      </div>
+
+      <p class="hint" id="hireNote"></p>
+      <p class="hint" style="margin-top:4px">Trailer rates are our live rates. Tip fees: Shire of Augusta Margaret River, residential. Skip figure indicative.</p>
+    </div>
   </div>
 </section>
 
@@ -721,6 +769,65 @@ document.getElementById('quoteForm').addEventListener('submit', async function(e
   }
   btn.disabled = false; btn.textContent = "Send quote request";
 });
+
+// ---------- Trailer hire cost calculator ----------
+(function(){
+  const trailerBtns = document.getElementById('trailerBtns');
+  if(!trailerBtns) return;
+
+  const TRAILERS = [
+    { id: "8x5",  label: "8×5 Compact", capM3: 3.7, rate: 150, skip: 320 },
+    { id: "10x5", label: "10×5 Medium", capM3: 4.6, rate: 175, skip: 420 },
+    { id: "10x6", label: "10×6 Large",  capM3: 5.5, rate: 200, skip: 520 }
+  ];
+  function tipFee(waste, m3){
+    if (waste === "green") return Math.max(0, Math.round((m3 - 2) * 10)); // first 2m³ free, then $10/m³
+    return Math.round((m3 - 1) * 54); // general waste $54/m³ above 1m³
+  }
+
+  let waste = "green", active = "10x6";
+
+  TRAILERS.forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "htog" + (t.id === active ? " active" : "");
+    b.dataset.tid = t.id;
+    b.textContent = t.label;
+    b.addEventListener("click", () => { active = t.id; render(); });
+    trailerBtns.appendChild(b);
+  });
+
+  document.querySelectorAll('[data-waste]').forEach(b => {
+    b.addEventListener('click', () => {
+      waste = b.getAttribute('data-waste');
+      document.querySelectorAll('[data-waste]').forEach(x => x.classList.toggle('active', x === b));
+      render();
+    });
+  });
+
+  function render(){
+    const t = TRAILERS.find(x => x.id === active);
+    const fee = tipFee(waste, t.capM3);
+    const total = t.rate + fee;
+    const saving = t.skip - total;
+    const feeText = fee === 0 ? "free" : "$" + fee;
+
+    document.getElementById('skipAmt').textContent = "$" + t.skip;
+    document.getElementById('oursAmt').textContent = "$" + total;
+    document.getElementById('oursMeta').textContent = "$" + t.rate + " " + t.label + " hire + " + feeText + " tip · " + t.capM3 + "m³ capacity";
+    document.getElementById('saveBig').textContent = "$" + saving;
+    document.getElementById('bookLabel').textContent = "Book the " + t.label;
+    document.getElementById('hireNote').textContent = waste === "green"
+      ? "Green waste is where you win biggest — the first 2m³ tips free, then it's just $10/m³."
+      : "Mixed waste is dearer to tip ($54/m³), but you still set the schedule and run multiple loads in your day.";
+
+    document.querySelectorAll('[data-tid]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-tid') === active);
+    });
+  }
+
+  render();
+})();
 </script>
 </body>
 </html>
