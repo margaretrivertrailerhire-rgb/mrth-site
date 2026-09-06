@@ -223,6 +223,24 @@ function getPrices() {
   };
 }
 
+/** Flat, all-in 10 t truck-load prices — material + delivery, no fuel
+ *  levy, no extras. Mirrors the "Full truck loads" table on the
+ *  homepage. Each material row is [name, MR & south, Cowaramup,
+ *  Gracetown]; anything outside those three zones is quoted manually. */
+function getTruckLoadPrices() {
+  return {
+    zones: ['MR & south', 'Cowaramup', 'Gracetown'],
+    materials: [
+      ['Screened yellow / white sand', 750, 810, 860],
+      ['Screened topsoil', 800, 860, 910],
+      ['A-grade gravel', 850, 910, 960],
+      ['Crushed 50mm red stone', 875, 935, 985],
+      ['Limestone road base', 900, 960, 1010],
+      ['Main Roads spec gravel', 925, 985, 1035]
+    ]
+  };
+}
+
 /** Run this once after pasting, to check the sheet connection + permissions. */
 function testSetup() {
   if (SHEET_ID === 'PASTE_YOUR_SHEET_ID_HERE') {
@@ -325,22 +343,38 @@ textarea{min-height:64px}
   </div>
 
   <div id="v-quote" style="display:none">
-    <label>Material</label><select id="q-mat"></select>
-    <div class="row3">
-      <div><label>Length m</label><input id="q-l" type="number" inputmode="decimal"></div>
-      <div><label>Width m</label><input id="q-w" type="number" inputmode="decimal"></div>
-      <div><label>Depth mm</label><input id="q-d" type="number" inputmode="numeric"></div>
+    <div class="filters">
+      <div class="chip on" id="qm-load">Per load</div>
+      <div class="chip" id="qm-truck">Truck load (10t)</div>
     </div>
-    <label>…or enter amount directly</label>
-    <div class="row2">
-      <input id="q-amt" type="number" inputmode="decimal" placeholder="amount">
-      <select id="q-unit"><option value="m3">m3</option><option value="t">tonnes</option></select>
+
+    <div id="q-load-mode">
+      <label>Material</label><select id="q-mat"></select>
+      <div class="row3">
+        <div><label>Length m</label><input id="q-l" type="number" inputmode="decimal"></div>
+        <div><label>Width m</label><input id="q-w" type="number" inputmode="decimal"></div>
+        <div><label>Depth mm</label><input id="q-d" type="number" inputmode="numeric"></div>
+      </div>
+      <label>…or enter amount directly</label>
+      <div class="row2">
+        <input id="q-amt" type="number" inputmode="decimal" placeholder="amount">
+        <select id="q-unit"><option value="m3">m3</option><option value="t">tonnes</option></select>
+      </div>
+      <label>Delivery fee to add ($)</label>
+      <input id="q-del" type="number" inputmode="decimal" placeholder="e.g. 140">
+      <div class="out" id="q-out"></div>
+      <div class="acts" style="margin-top:12px">
+        <button class="btn org" id="q-copy">Copy quote message</button>
+      </div>
     </div>
-    <label>Delivery fee to add ($)</label>
-    <input id="q-del" type="number" inputmode="decimal" placeholder="e.g. 140">
-    <div class="out" id="q-out"></div>
-    <div class="acts" style="margin-top:12px">
-      <button class="btn org" id="q-copy">Copy quote message</button>
+
+    <div id="q-truck-mode" style="display:none">
+      <label>Material</label><select id="qt-mat"></select>
+      <label>Zone</label><select id="qt-zone"></select>
+      <div class="out" id="qt-out"></div>
+      <div class="acts" style="margin-top:12px">
+        <button class="btn org" id="qt-copy">Copy quote message</button>
+      </div>
     </div>
   </div>
 
@@ -385,7 +419,7 @@ function drawFilters(){
   document.getElementById('filters').innerHTML = f.map(function(s){
     return '<div class="chip'+(s===FILTER?' on':'')+'" data-f="'+s+'">'+s+'</div>';
   }).join('');
-  document.querySelectorAll('.chip').forEach(function(c){
+  document.querySelectorAll('#filters .chip').forEach(function(c){
     c.onclick=function(){FILTER=c.dataset.f;drawFilters();drawList();};
   });
 }
@@ -641,7 +675,64 @@ document.getElementById('q-copy').onclick=function(){
   document.body.removeChild(ta);
 };
 
-load(); buildMats();
+/* ---------- TRUCK LOAD (10t flat price) ---------- */
+document.getElementById('qm-load').onclick=function(){ setQuoteMode('load'); };
+document.getElementById('qm-truck').onclick=function(){ setQuoteMode('truck'); };
+function setQuoteMode(m){
+  document.getElementById('qm-load').classList.toggle('on', m==='load');
+  document.getElementById('qm-truck').classList.toggle('on', m==='truck');
+  document.getElementById('q-load-mode').style.display = (m==='load') ? '' : 'none';
+  document.getElementById('q-truck-mode').style.display = (m==='truck') ? '' : 'none';
+}
+
+var TRUCK = {zones:[], materials:[]};
+function buildTruckMats(){
+  google.script.run.withSuccessHandler(function(t){
+    TRUCK = t;
+    var zoneSel=document.getElementById('qt-zone'); zoneSel.innerHTML='';
+    t.zones.concat(['Other (quote manually)']).forEach(function(z){
+      var o=document.createElement('option'); o.value=z; o.textContent=z; zoneSel.appendChild(o);
+    });
+    var matSel=document.getElementById('qt-mat'); matSel.innerHTML='';
+    t.materials.forEach(function(m){
+      var o=document.createElement('option'); o.value=m[0]; o.textContent=m[0]; matSel.appendChild(o);
+    });
+    truckQuote();
+  }).getTruckLoadPrices();
+}
+
+function truckQuote(){
+  var matName=document.getElementById('qt-mat').value;
+  var zoneName=document.getElementById('qt-zone').value;
+  var out=document.getElementById('qt-out');
+  var zoneIdx=TRUCK.zones.indexOf(zoneName);
+  var row=TRUCK.materials.filter(function(m){return m[0]===matName;})[0];
+  if(!row || zoneIdx===-1){
+    out.innerHTML='<div class="ln">Not a standard truck-load zone — quote this one manually.</div>';
+    out.classList.add('on');
+    out.dataset.msg='';
+    return;
+  }
+  var price=row[zoneIdx+1];
+  out.innerHTML='<div class="big">$'+price+'</div>'
+    + '<div class="ln">10 t '+matName+' — '+zoneName+'</div>'
+    + '<div class="ln">All-in: material + delivery, no extras.</div>';
+  out.classList.add('on');
+  out.dataset.msg='A full truck load — 10 t of '+matName+' delivered, all up $'+price+'. '
+    + 'One drop, no fuel levy, no extras.\\n\\nTo lock it in, payment first please: https://buy.stripe.com/6oUbIUdbo9APbiobRW7AI0B\\n'
+    + 'Just enter $'+price+' when it asks for the amount 👍\\n\\nOnce that\\'s through I\\'ll confirm your delivery window.';
+}
+document.getElementById('qt-mat').addEventListener('change', truckQuote);
+document.getElementById('qt-zone').addEventListener('change', truckQuote);
+document.getElementById('qt-copy').onclick=function(){
+  var m=document.getElementById('qt-out').dataset.msg;
+  if(!m){toast('Pick a standard zone first');return;}
+  var ta=document.createElement('textarea'); ta.value=m; document.body.appendChild(ta);
+  ta.select(); try{document.execCommand('copy');toast('Quote copied');}catch(e){toast('Copy failed');}
+  document.body.removeChild(ta);
+};
+
+load(); buildMats(); buildTruckMats();
 </script>
 </body></html>
 `;
