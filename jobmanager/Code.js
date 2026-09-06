@@ -44,7 +44,8 @@ const SHEET_NAME = 'Enquiries';
 const REQUIRED_COLS = [
   'Received','Status','Type','Name','Phone','Email','Material','Quantity',
   'Suburb','Timeframe','Access notes','Quoted $','Notes','Carrier','Load Type',
-  'Delivery address','Paid date','Delivered date','Invoice No','Invoice Link'
+  'Delivery address','Paid date','Delivered date','Invoice No','Invoice Link',
+  'Scheduled date','Start Date','End Date','Calendar Event ID'
 ];
 
 const STATUSES = ['New','Quoted','Paid','Booked','Delivered','Closed'];
@@ -106,6 +107,10 @@ function getJobs() {
     };
     let received = map['Received'] !== undefined ? r[map['Received']] : '';
     if (received instanceof Date) received = Utilities.formatDate(received, Session.getScriptTimeZone(), 'd MMM h:mm a');
+    const fmtDay = function (v) {
+      if (v instanceof Date && !isNaN(v.getTime())) return Utilities.formatDate(v, Session.getScriptTimeZone(), 'd MMM yyyy');
+      return v ? String(v) : '';
+    };
     out.push({
       row: i + 2,
       received: String(received),
@@ -125,7 +130,10 @@ function getJobs() {
       loadType: get('Load Type'),
       address: get('Delivery address'),
       invoiceNo: get('Invoice No'),
-      invoiceLink: get('Invoice Link')
+      invoiceLink: get('Invoice Link'),
+      scheduled: fmtDay(get('Scheduled date')),
+      startDate: fmtDay(get('Start Date')),
+      endDate: fmtDay(get('End Date'))
     });
   }
   return out.reverse();
@@ -139,6 +147,7 @@ function updateJob(row, field, value) {
   if (field === 'Phone') value = "'" + value;
   sh.getRange(row, map[field] + 1).setValue(value);
   if (field === 'Status') stampStatusDate_(sh, map, row, value);
+  syncJobCalendarEvent_(row);
   return true;
 }
 
@@ -410,12 +419,15 @@ function drawList(){
       + (j.carrier?'<div class="kv">Carrier: <b>'+esc(j.carrier)+'</b></div>':'')
       + (j.notes?'<div class="kv">Notes: <b>'+esc(j.notes)+'</b></div>':'')
       + (j.invoiceNo?'<div class="kv">Invoice: <b>'+esc(j.invoiceNo)+'</b>'+(j.invoiceLink?' — <a href="'+j.invoiceLink+'" target="_blank" style="color:inherit">PDF</a>':'')+'</div>':'')
+      + (j.startDate?'<div class="kv">Hire dates: <b>'+esc(j.startDate)+(j.endDate?' to '+esc(j.endDate):'')+'</b></div>':'')
+      + (j.scheduled?'<div class="kv">Scheduled: <b>'+esc(j.scheduled)+'</b></div>':'')
       + '<div class="acts">'
       + (tel?'<a class="btn" href="'+tel+'">Call</a>':'')
       + (sms?'<a class="btn" href="'+sms+'">Text</a>':'')
       + '<button class="btn gh" onclick="setQuoted('+j.row+')">Set $</button>'
       + '<button class="btn gh" onclick="setCarrier('+j.row+')">Carrier</button>'
       + '<button class="btn gh" onclick="setAddress('+j.row+')">Address</button>'
+      + '<button class="btn gh" onclick="setJobDate('+j.row+')">Date</button>'
       + '<button class="btn gh" onclick="setNote('+j.row+')">Note</button>'
       + '<button class="btn org" onclick="genInvoice('+j.row+')">Invoice</button>'
       + '</div>'
@@ -460,6 +472,19 @@ function setAddress(row){
 function setNote(row){
   var j=JOBS.filter(function(x){return x.row===row;})[0];
   var v=prompt('Notes', j?j.notes:''); if(v!==null) save(row,'Notes',v,'Note saved');
+}
+function setJobDate(row){
+  var j=JOBS.filter(function(x){return x.row===row;})[0];
+  var isTrailer = j && j.type && j.type.toLowerCase().indexOf('trailer')!==-1;
+  if(isTrailer){
+    var s=prompt('Start date (YYYY-MM-DD)', j?j.startDate:''); if(s===null) return;
+    save(row,'Start Date',s,'Start date saved');
+    var e=prompt('End date (YYYY-MM-DD)', (j?j.endDate:'')||s); if(e===null) return;
+    save(row,'End Date',e,'End date saved');
+  } else {
+    var d=prompt('Scheduled date (YYYY-MM-DD)', j?j.scheduled:''); if(d===null) return;
+    save(row,'Scheduled date',d,'Scheduled date saved');
+  }
 }
 
 /* ---------- INVOICE ---------- */
