@@ -197,7 +197,8 @@ function sendAlert_(d) {
     to: ALERT_EMAIL,
     subject: subject,
     body: body,
-    replyTo: d.email || ALERT_EMAIL
+    replyTo: d.email || ALERT_EMAIL,
+    name: "MR Trailer Hire & Landscape Delivery"
   });
 }
 

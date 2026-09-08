@@ -13,8 +13,8 @@
  */
 
 const INVOICE_CONFIG = {
-  BUSINESS_NAME: 'Margaret River Trailer Hire & Landscape Delivery',
-  TRADING_SHORT: 'Margaret River Trailer Hire',
+  BUSINESS_NAME: 'MR Trailer Hire & Landscape Delivery', // exact ASIC-registered name (8 Sept 2026)
+  TRADING_SHORT: 'MR Trailer Hire',
   ABN: '60 322 641 541',
   EMAIL: 'margaretrivertrailerhire@gmail.com',
   WEBSITE: 'margaretrivertrailerhire.com.au',

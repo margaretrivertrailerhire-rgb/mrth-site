@@ -1,5 +1,5 @@
 /**
- * Margaret River Trailer Hire — booking form handler
+ * MR Trailer Hire & Landscape Delivery — booking form handler
  * ------------------------------------------------------
  * handleBooking_() is called from doPost() in Booking.js (the shared
  * entry point for both web app deployments) whenever the incoming

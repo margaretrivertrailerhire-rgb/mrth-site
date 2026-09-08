@@ -1,5 +1,5 @@
 /**
- * Margaret River Trailer Hire — new booking email alert
+ * MR Trailer Hire & Landscape Delivery — new booking email alert
  * -------------------------------------------------------
  * Emails you whenever a new row is added to the "Bookings" tab,
  * so a booking from the website doesn't sit unseen while you're
@@ -66,8 +66,8 @@ function checkForNewBookings() {
           lines.push(headers[i] + ": " + row[i]);
         }
       }
-      var body = "New booking received on Margaret River Trailer Hire:\n\n" + lines.join("\n");
-      MailApp.sendEmail(YOUR_EMAIL, "New trailer booking", body);
+      var body = "New booking received on MR Trailer Hire & Landscape Delivery:\n\n" + lines.join("\n");
+      MailApp.sendEmail(YOUR_EMAIL, "New trailer booking", body, { name: "MR Trailer Hire & Landscape Delivery" });
     });
   }
 
