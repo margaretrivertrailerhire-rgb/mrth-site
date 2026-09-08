@@ -24,9 +24,7 @@ const INVOICE_CONFIG = {
 
   PAYMENT_TERMS: 'Payment due on delivery unless otherwise agreed.',
   STRIPE_LINK: 'https://buy.stripe.com/6oUbIUdbo9APbiobRW7AI0B', // generic choose-your-amount link, also used by the in-app quoter
-  BANK_NAME: '',
-  BANK_BSB: '',
-  BANK_ACCT: '',
+  PAYID: 'margaretrivertrailerhire@gmail.com', // email-form PayID — printed instead of BSB/account, fewer digits to mistype and the payer's bank confirms the account name
 
   // 'draft' creates a Gmail draft, 'send' sends immediately. Leave on
   // draft until Neil says otherwise — every invoice gets a human look
@@ -319,11 +317,9 @@ function renderInvoiceHtml_(m) {
   if (m.stripeLink) {
     payment += '<p class="note">Pay by card or Apple Pay: <a href="' + m.stripeLink + '">' + m.stripeLink + '</a></p>';
   }
-  if (INVOICE_CONFIG.BANK_BSB && INVOICE_CONFIG.BANK_ACCT) {
-    payment += '<p class="note">Bank transfer: ' + escapeHtml_(INVOICE_CONFIG.BANK_NAME) +
-      ' &nbsp; BSB ' + escapeHtml_(INVOICE_CONFIG.BANK_BSB) +
-      ' &nbsp; Acct ' + escapeHtml_(INVOICE_CONFIG.BANK_ACCT) +
-      '<br>Reference: ' + m.invoiceNumber + '</p>';
+  if (INVOICE_CONFIG.PAYID) {
+    payment += '<p class="note">Or PayID: ' + escapeHtml_(INVOICE_CONFIG.PAYID) +
+      ' — reference ' + m.invoiceNumber + '</p>';
   }
 
   const buyerBlock = [
@@ -471,6 +467,7 @@ function createInvoiceEmailDraft(row) {
     'Your ' + model.title.toLowerCase() + ' for ' + money_(model.total) + ' is attached.\n\n' +
     INVOICE_CONFIG.PAYMENT_TERMS + '\n' +
     (model.stripeLink ? 'Pay by card or Apple Pay: ' + model.stripeLink + '\n' : '') +
+    (INVOICE_CONFIG.PAYID ? 'Or PayID: ' + INVOICE_CONFIG.PAYID + ' — reference ' + model.invoiceNumber + '\n' : '') +
     '\nThanks again for the job. If you were happy with the delivery, a quick Google review makes a real difference to a small local business:\n' +
     INVOICE_CONFIG.REVIEW_LINK + '\n\n' +
     'Cheers,\n' + INVOICE_CONFIG.TRADING_SHORT + '\n' + INVOICE_CONFIG.WEBSITE;
