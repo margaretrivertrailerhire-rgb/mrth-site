@@ -369,7 +369,8 @@ const PRODUCT_COST_ALIASES = {
   'bushland': 'bushland mulch',
   'mrd gravel road base': 'main roads gravel',
   'mrd limestone road base': 'limestone road base',
-  'screened yellow / white sand': 'white sand' // same cost either colour (both 38.50/t)
+  'screened yellow / white sand': 'white sand', // same cost either colour (both 38.50/t)
+  'main roads spec gravel': 'main roads gravel' // truck-load tab's name for this NCJ product
 };
 
 function costTableSheet_() {
