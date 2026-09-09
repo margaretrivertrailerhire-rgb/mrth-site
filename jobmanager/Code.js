@@ -45,10 +45,17 @@ const REQUIRED_COLS = [
   'Received','Status','Type','Name','Phone','Email','Material','Quantity',
   'Suburb','Timeframe','Access notes','Quoted $','Notes','Carrier','Load Type',
   'Delivery address','Paid date','Delivered date','Invoice No','Invoice Link',
-  'Scheduled date','Start Date','End Date','Calendar Event ID'
+  'Scheduled date','Start Date','End Date','Calendar Event ID',
+  'Source','Customer type','Lane','Qty','Unit','Cost ex GST','Sell ex GST',
+  'Margin ex GST','Lost reason','Closed date','Month'
 ];
 
-const STATUSES = ['New','Quoted','Paid','Booked','Delivered','Closed'];
+const STATUSES = ['New','Quoted','Paid','Booked','Delivered','Closed','Declined','Lost'];
+const SOURCES = ['FB ad','FB group post','Marketplace','Google','Website','Repeat customer','Referral','Word of mouth','Other'];
+const CUSTOMER_TYPES = ['Trade','Repeat','One-off'];
+const LANES = ['Trailer single','Trailer double','Truck 10t (NCJ)','Truck 10t (other carrier)','Truck 20t+'];
+const UNITS = ['t','m3'];
+const LOST_REASONS = ['Price','No reply','Away on swing','No carrier','Other'];
 
 /** Serve the app. */
 function doGet() {
@@ -133,7 +140,17 @@ function getJobs() {
       invoiceLink: get('Invoice Link'),
       scheduled: fmtDay(get('Scheduled date')),
       startDate: fmtDay(get('Start Date')),
-      endDate: fmtDay(get('End Date'))
+      endDate: fmtDay(get('End Date')),
+      source: get('Source'),
+      custType: get('Customer type'),
+      lane: get('Lane'),
+      pqty: get('Qty'),
+      unit: get('Unit'),
+      cost: get('Cost ex GST'),
+      sell: get('Sell ex GST'),
+      margin: get('Margin ex GST'),
+      lostReason: get('Lost reason'),
+      closedDate: fmtDay(get('Closed date'))
     });
   }
   return out.reverse();
@@ -147,8 +164,103 @@ function updateJob(row, field, value) {
   if (field === 'Phone') value = "'" + value;
   sh.getRange(row, map[field] + 1).setValue(value);
   if (field === 'Status') stampStatusDate_(sh, map, row, value);
+  if (field === 'Qty' || field === 'Unit' || field === 'Type') inferLaneIfBlank_(sh, map, row);
+  syncJobFinance_(row);
   syncJobCalendarEvent_(row);
   return true;
+}
+
+/**
+ * Closes a job as Declined (turned away) or Lost (quoted, then lost) —
+ * one compound action: sets Status, stamps Closed date, records the
+ * reason (defaults to 'Other' if the picker was skipped). Everything on
+ * the row — quoted amount, qty, lane, cost — is left exactly as it was;
+ * only Status/Lost reason/Closed date change. A tentative calendar event
+ * (if any) is removed the same way any other non-Booked status removes
+ * one, via syncJobCalendarEvent_.
+ */
+function closeJob(row, status, reason) {
+  const sh = sheet_();
+  const map = headerMap_(sh);
+  if (map['Status'] === undefined) throw new Error('Missing Status column.');
+  sh.getRange(row, map['Status'] + 1).setValue(status);
+  if (map['Lost reason'] !== undefined) sh.getRange(row, map['Lost reason'] + 1).setValue(reason || 'Other');
+  if (map['Closed date'] !== undefined) sh.getRange(row, map['Closed date'] + 1).setValue(new Date());
+  syncJobFinance_(row);
+  syncJobCalendarEvent_(row);
+  return true;
+}
+
+/** Defaults a blank Lane to Trailer single once a job has some real
+ *  content (a Type or a Qty) — never overwrites a Lane that's already
+ *  set. Truck lanes are never guessed; they're only ever written
+ *  explicitly by the truck-load tab's save, for its six NCJ products. */
+function inferLaneIfBlank_(sh, map, row) {
+  if (map['Lane'] === undefined) return;
+  const laneCell = sh.getRange(row, map['Lane'] + 1);
+  if (laneCell.getValue()) return;
+
+  const get = function (field) {
+    if (map[field] === undefined) return '';
+    const v = sh.getRange(row, map[field] + 1).getValue();
+    return v === null || v === undefined ? '' : v;
+  };
+  const qty = parseFloat(get('Qty')) || 0;
+  if (qty <= 0 && !get('Type')) return;
+  // Truck lanes are only ever set explicitly, by the truck-load tab's
+  // save (six NCJ products only) — every other material, whatever the
+  // tonnage, defaults to a trailer lane. Tonnage alone is not a signal
+  // that NCJ is involved.
+  laneCell.setValue('Trailer single');
+}
+
+/**
+ * Sell ex GST and Margin ex GST for one row, recalculated on every
+ * relevant edit so both stay correct across the 1 Oct 2026 GST
+ * changeover — including for a job whose Paid/Delivered date is set
+ * later, well after it was first quoted. Reuses the exact same
+ * gstAppliesOn()/resolveSupplyDate_() the invoice generator uses, so
+ * "is this job GST-inclusive" only has one answer anywhere in the app.
+ * Sell is written as a plain value (it depends on a Script Property,
+ * which a sheet formula can't read); Margin is a real formula, written
+ * once, that keeps recalculating itself against Sell/Cost on the row.
+ */
+function syncJobFinance_(row) {
+  const sh = sheet_();
+  const map = headerMap_(sh);
+  if (map['Sell ex GST'] === undefined) return;
+
+  const ctx = readJobRow_(row);
+  const rawQuoted = ctx.get('Quoted $');
+  const total = parseAmount_(rawQuoted);
+  const supply = resolveSupplyDate_(ctx);
+  const gst = gstAppliesOn(supply.date);
+  const sell = total > 0 ? (gst ? Math.round((total / 1.1) * 100) / 100 : total) : '';
+  sh.getRange(row, map['Sell ex GST'] + 1).setValue(sell);
+
+  if (map['Margin ex GST'] !== undefined) {
+    const sellCol = columnLetter_(map['Sell ex GST'] + 1);
+    const costCol = columnLetter_(map['Cost ex GST'] + 1);
+    const formula = '=IF(OR(' + sellCol + row + '="",' + costCol + row + '=""),"",' + sellCol + row + '-' + costCol + row + ')';
+    const cell = sh.getRange(row, map['Margin ex GST'] + 1);
+    if (cell.getFormula() !== formula) cell.setFormula(formula);
+  }
+  if (map['Month'] !== undefined && map['Received'] !== undefined) {
+    const recCol = columnLetter_(map['Received'] + 1);
+    const formula = '=IF(' + recCol + row + '="","",TEXT(EOMONTH(' + recCol + row + ',-1)+1,"mmm-yy"))';
+    const cell = sh.getRange(row, map['Month'] + 1);
+    if (cell.getFormula() !== formula) cell.setFormula(formula);
+  }
+}
+
+function columnLetter_(col) {
+  let s = '';
+  while (col > 0) {
+    const rem = (col - 1) % 26;
+    s = String.fromCharCode(65 + rem) + s;
+    col = Math.floor((col - 1) / 26);
+  }
+  return s;
 }
 
 /** Paid/Delivered dates are stamped automatically the first time a chip is
@@ -180,7 +292,10 @@ function addJob(obj) {
   set('Timeframe', obj.timeframe || '');
   set('Access notes', obj.access || '');
   set('Notes', obj.notes || '');
+  set('Source', obj.source || '');
+  set('Customer type', obj.custType || '');
   sh.appendRow(row);
+  syncJobFinance_(sh.getLastRow());
   return true;
 }
 
@@ -238,6 +353,327 @@ function getTruckLoadPrices() {
       ['Limestone road base', 900, 960, 1010],
       ['Main Roads spec gravel', 925, 985, 1035]
     ]
+  };
+}
+
+/* ============ PIPELINE: cost lookup ============ */
+
+const PRICING_SHEET_NAME = 'Pricing';
+const COST_TABLE_COL = 6; // column F — a second table on the Pricing tab: Product | Lane | Cost ex GST | Cost basis
+
+/** A few getPrices() material names map cleanly onto the seeded cost
+ *  figures under a different label. This is the only guessing this does
+ *  — anything not listed here needs its own cost row added by name in
+ *  the sheet (see setupPricingCosts). */
+const PRODUCT_COST_ALIASES = {
+  'bushland': 'bushland mulch',
+  'mrd gravel road base': 'main roads gravel',
+  'mrd limestone road base': 'limestone road base',
+  'screened yellow / white sand': 'white sand' // same cost either colour (both 38.50/t)
+};
+
+function costTableSheet_() {
+  return SpreadsheetApp.openById(SHEET_ID).getSheetByName(PRICING_SHEET_NAME);
+}
+
+/** Last row actually used by the F:I cost table specifically — the A:D
+ *  trailer-rate table on the same tab has its own, unrelated height. */
+function costTableLastRow_(sh) {
+  const col = sh.getRange(1, COST_TABLE_COL, sh.getMaxRows(), 1).getValues();
+  let last = 0;
+  for (let i = 0; i < col.length; i++) {
+    if (String(col[i][0]).trim() !== '') last = i + 1;
+  }
+  return last;
+}
+
+function costRows_() {
+  const sh = costTableSheet_();
+  if (!sh) return [];
+  const last = costTableLastRow_(sh);
+  if (last < 2) return [];
+  return sh.getRange(2, COST_TABLE_COL, last - 1, 4).getValues()
+    .map(function (r) {
+      return { product: String(r[0] || '').trim(), lane: String(r[1] || '').trim(), cost: r[2], basis: String(r[3] || '').trim() };
+    })
+    .filter(function (r) { return r.product; });
+}
+
+/** Looks up Cost ex GST for a product + lane: exact product name, then
+ *  the small alias list above, then falls back to the product's only
+ *  cost row if it has just one (lane doesn't matter). Returns null (not
+ *  0) when nothing is found, so a missing cost can be flagged rather
+ *  than silently costed at zero. */
+function lookupCost_(product, lane) {
+  const key = String(product || '').trim().toLowerCase();
+  if (!key) return null;
+  const wantedKey = PRODUCT_COST_ALIASES[key] || key;
+  const matches = costRows_().filter(function (r) { return r.product.toLowerCase() === wantedKey; });
+  if (!matches.length) return null;
+  const laneMatch = matches.filter(function (r) { return r.lane.toLowerCase() === String(lane || '').toLowerCase(); });
+  const row = laneMatch.length ? laneMatch[0] : matches[0];
+  const n = typeof row.cost === 'number' ? row.cost : parseFloat(row.cost);
+  return isNaN(n) ? null : n;
+}
+
+/** One-time setup: adds the Product/Lane/Cost ex GST/Cost basis table to
+ *  the Pricing tab (columns F:I, leaving the existing trailer-rate table
+ *  in A:D untouched) and seeds it with the known NCJ/Cowara figures.
+ *  Safe to re-run — only adds rows that aren't already there. */
+function setupPricingCosts() {
+  const sh = costTableSheet_();
+  if (!sh) throw new Error('No "' + PRICING_SHEET_NAME + '" tab found.');
+
+  const headers = ['Product', 'Lane', 'Cost ex GST', 'Cost basis'];
+  const headerRange = sh.getRange(1, COST_TABLE_COL, 1, 4);
+  if (headerRange.getValues()[0].join('|') !== headers.join('|')) {
+    headerRange.setValues([headers]).setFontWeight('bold');
+  }
+
+  const NCJ = 'NCJ Adamson, delivered, MR-Augusta zone (Cowaramup +5.00/t, Gracetown +10.00/t)';
+  const seed = [
+    ['White sand', 'Truck 10t (NCJ)', 38.50, NCJ],
+    ['Yellow sand', 'Truck 10t (NCJ)', 38.50, NCJ],
+    ['Screened topsoil', 'Truck 10t (NCJ)', 42.00, NCJ],
+    ['A-grade gravel', 'Truck 10t (NCJ)', 41.80, NCJ],
+    ['Main Roads gravel', 'Truck 10t (NCJ)', 47.30, NCJ],
+    ['Limestone road base', 'Truck 10t (NCJ)', 49.50, NCJ],
+    ['Crushed 50mm red stone', 'Truck 10t (NCJ)', 46.20, NCJ],
+    ['Quartz grit', 'Truck 10t (NCJ)', 55.00, NCJ],
+    ['Dam fill', 'Truck 10t (NCJ)', 33.60, NCJ],
+    ['Rip rap / laterite', 'Truck 10t (NCJ)', 88.00, NCJ],
+    ['Granite', 'Truck 10t (NCJ)', 148.50, NCJ],
+    ['Bushland mulch', 'Trailer single', 120.00, 'Cowara yard + per-trip delivery'],
+    ['Trailer hire', 'Trailer single', 0, 'Trailer hire - nil']
+  ];
+
+  const existing = costRows_();
+  const already = function (product, lane) {
+    return existing.some(function (r) {
+      return r.product.toLowerCase() === product.toLowerCase() && r.lane.toLowerCase() === lane.toLowerCase();
+    });
+  };
+  const toAdd = seed.filter(function (r) { return !already(r[0], r[1]); });
+  if (toAdd.length) {
+    sh.getRange(costTableLastRow_(sh) + 1, COST_TABLE_COL, toAdd.length, 4).setValues(toAdd);
+  }
+  Logger.log('Cost table ready: added ' + toAdd.length + ' row(s), ' + (seed.length - toAdd.length) + ' already present.');
+  return 'OK';
+}
+
+/** Called when the quoter is bound to a job ("Save to job"): writes
+ *  Quoted $, Qty, Unit and Lane, looks up Cost ex GST for the product +
+ *  lane and writes that too (scaled by qty). Sell/Margin then follow on
+ *  from syncJobFinance_. Returns whether a cost was actually found, so
+ *  the card can show a "no cost set" flag when it wasn't. */
+function saveQuoteToJob(row, payload) {
+  const sh = sheet_();
+  const map = headerMap_(sh);
+  const set = function (field, value) {
+    if (map[field] !== undefined && value !== undefined && value !== null && value !== '') {
+      sh.getRange(row, map[field] + 1).setValue(value);
+    }
+  };
+  set('Quoted $', payload.total);
+  set('Qty', payload.qty);
+  set('Unit', payload.unit);
+  if (payload.lane) set('Lane', payload.lane);
+
+  const cost = lookupCost_(payload.product, payload.lane);
+  const costFound = cost !== null;
+  if (costFound) set('Cost ex GST', Math.round(cost * payload.qty * 100) / 100);
+
+  inferLaneIfBlank_(sh, map, row);
+  syncJobFinance_(row);
+  return { costFound: costFound };
+}
+
+/* ============ PIPELINE: setup ============ */
+
+function columnLetter_(col) {
+  let s = '';
+  while (col > 0) {
+    const rem = (col - 1) % 26;
+    s = String.fromCharCode(65 + rem) + s;
+    col = Math.floor((col - 1) / 26);
+  }
+  return s;
+}
+
+/** One-time setup: dropdowns for every Pipeline field on Enquiries.
+ *  Safe to re-run any time. */
+function setupPipelineValidation() {
+  const sh = sheet_();
+  const map = headerMap_(sh);
+  const maxRows = Math.max(sh.getMaxRows(), 500);
+
+  const applyList = function (field, list) {
+    if (map[field] === undefined) return;
+    const rule = SpreadsheetApp.newDataValidation().requireValueInList(list, true).setAllowInvalid(false).build();
+    sh.getRange(2, map[field] + 1, maxRows - 1, 1).setDataValidation(rule);
+  };
+
+  applyList('Status', STATUSES);
+  applyList('Source', SOURCES);
+  applyList('Customer type', CUSTOMER_TYPES);
+  applyList('Lane', LANES);
+  applyList('Unit', UNITS);
+  applyList('Lost reason', LOST_REASONS);
+
+  Logger.log('Pipeline dropdowns set up on Enquiries.');
+  return 'OK';
+}
+
+/** One-time (or re-run any time) backfill: writes the Month/Margin
+ *  formulas and current Sell ex GST onto every existing row, for jobs
+ *  that were on the sheet before this feature existed. */
+function backfillPipelineFormulas() {
+  const sh = sheet_();
+  const last = sh.getLastRow();
+  for (let r = 2; r <= last; r++) syncJobFinance_(r);
+  Logger.log('Backfilled ' + (last - 1) + ' row(s).');
+  return 'OK';
+}
+
+/**
+ * One-time setup: builds the Pipeline tab — Sep-26 through Aug-27 across
+ * the columns, one row per metric, all COUNTIFS/SUMIFS/AVERAGEIFS-style
+ * formulas against Enquiries (plus one SUMPRODUCT for the avg-days
+ * metric, which needs a conditional average of a date difference that
+ * those functions can't express). Column positions for each Enquiries
+ * field are looked up once here and baked into the formulas, so this
+ * must be re-run if Enquiries columns are ever deleted or reordered
+ * (appending new columns, which is all sheet_() ever does, is fine).
+ * Re-running clears and rebuilds the tab from scratch.
+ */
+function setupPipelineTab() {
+  const enq = sheet_();
+  const emap = headerMap_(enq);
+  const need = ['Month', 'Status', 'Lane', 'Unit', 'Qty', 'Margin ex GST', 'Lost reason', 'Customer type', 'Received', 'Delivered date'];
+  need.forEach(function (f) {
+    if (emap[f] === undefined) throw new Error('Enquiries is missing "' + f + '" — open the app once first so it creates the Pipeline columns.');
+  });
+  const col = {};
+  need.forEach(function (f) { col[f] = columnLetter_(emap[f] + 1); });
+  const ref = function (f) { return 'Enquiries!$' + col[f] + '$2:$' + col[f] + '$5000'; };
+
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sh = ss.getSheetByName('Pipeline');
+  if (!sh) sh = ss.insertSheet('Pipeline'); else sh.clear();
+
+  const months = [];
+  const start = new Date(2026, 8, 1); // Sep 2026
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+    months.push(Utilities.formatDate(d, Session.getScriptTimeZone(), 'MMM-yy'));
+  }
+
+  const labels = [
+    'Metric', 'Enquiries (all)', 'Truck loads delivered', 'Trailer deliveries',
+    'Tonnes delivered', 'Margin ex GST — delivered', 'Avg margin per truck load',
+    'Declined/Lost — Away on swing', 'Declined/Lost — No carrier + Other',
+    'Lost on price / no reply', 'Margin lost to swing (est.)',
+    'Repeat/trade share of deliveries', 'Avg days enquiry to delivery'
+  ];
+  sh.getRange(1, 1, labels.length, 1).setValues(labels.map(function (l) { return [l]; }));
+  sh.getRange(1, 2, 1, months.length).setValues([months]);
+  sh.getRange(1, 1, 1, months.length + 1).setFontWeight('bold');
+  sh.setFrozenRows(1);
+  sh.setFrozenColumns(1);
+
+  for (let i = 0; i < months.length; i++) {
+    const c = columnLetter_(2 + i);
+    const m = c + '$1';
+
+    sh.getRange(c + '2').setFormula('=COUNTIFS(' + ref('Month') + ',' + m + ')');
+
+    sh.getRange(c + '3').setFormula(
+      '=COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Delivered",' + ref('Lane') + ',"Truck*")' +
+      '+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Paid",' + ref('Lane') + ',"Truck*")'
+    );
+
+    sh.getRange(c + '4').setFormula(
+      '=COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Delivered",' + ref('Lane') + ',"Trailer*")' +
+      '+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Paid",' + ref('Lane') + ',"Trailer*")'
+    );
+
+    sh.getRange(c + '5').setFormula(
+      '=SUMIFS(' + ref('Qty') + ',' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Delivered",' + ref('Unit') + ',"t")' +
+      '+SUMIFS(' + ref('Qty') + ',' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Paid",' + ref('Unit') + ',"t")'
+    );
+
+    sh.getRange(c + '6').setFormula(
+      '=SUMIFS(' + ref('Margin ex GST') + ',' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Delivered")' +
+      '+SUMIFS(' + ref('Margin ex GST') + ',' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Paid")'
+    );
+
+    sh.getRange(c + '7').setFormula(
+      '=IFERROR((SUMIFS(' + ref('Margin ex GST') + ',' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Delivered",' + ref('Lane') + ',"Truck*")' +
+      '+SUMIFS(' + ref('Margin ex GST') + ',' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Paid",' + ref('Lane') + ',"Truck*"))/' + c + '3,"")'
+    );
+
+    sh.getRange(c + '8').setFormula('=COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Lost reason') + ',"Away on swing")');
+
+    sh.getRange(c + '9').setFormula(
+      '=COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Lost reason') + ',"No carrier")' +
+      '+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Lost reason') + ',"Other")'
+    );
+
+    sh.getRange(c + '10').setFormula(
+      '=COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Lost reason') + ',"Price")' +
+      '+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Lost reason') + ',"No reply")'
+    );
+
+    sh.getRange(c + '11').setFormula('=' + c + '8*' + c + '7');
+
+    sh.getRange(c + '12').setFormula(
+      '=IFERROR((COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Customer type') + ',"Trade",' + ref('Status') + ',"Delivered")' +
+      '+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Customer type') + ',"Trade",' + ref('Status') + ',"Paid")' +
+      '+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Customer type') + ',"Repeat",' + ref('Status') + ',"Delivered")' +
+      '+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Customer type') + ',"Repeat",' + ref('Status') + ',"Paid"))/' +
+      '(COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Delivered")+COUNTIFS(' + ref('Month') + ',' + m + ',' + ref('Status') + ',"Paid")),"")'
+    );
+    sh.getRange(c + '12').setNumberFormat('0%');
+
+    sh.getRange(c + '13').setFormula(
+      '=IFERROR(SUMPRODUCT((' + ref('Month') + '=' + m + ')*(' + ref('Status') + '="Delivered")*(' + ref('Delivered date') + '<>"")*(' + ref('Delivered date') + '-' + ref('Received') + '))' +
+      '/SUMPRODUCT((' + ref('Month') + '=' + m + ')*(' + ref('Status') + '="Delivered")*(' + ref('Delivered date') + '<>"")),"")'
+    );
+  }
+
+  sh.getRange('A15').setValue('Target truck loads/month');
+  sh.getRange('B15').setValue(10);
+  sh.getRange('A16').setValue('Months hitting target');
+  sh.getRange('B16').setFormula('=COUNTIF(B3:M3,">="&B15)');
+  sh.getRange('A17').setValue('Total loads lost to swing');
+  sh.getRange('B17').setFormula('=SUM(B8:M8)');
+  sh.getRange('A18').setValue('Total margin to date');
+  sh.getRange('B18').setFormula('=SUM(B6:M6)');
+
+  sh.autoResizeColumns(1, 1);
+  Logger.log('Pipeline tab created/refreshed.');
+  return 'OK';
+}
+
+/** Current month's headline numbers off the Pipeline tab, for the
+ *  one-line summary on the Jobs screen. Null if the Pipeline tab hasn't
+ *  been set up yet. */
+function getPipelineSummary() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sh = ss.getSheetByName('Pipeline');
+  if (!sh) return null;
+
+  const monthLabel = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MMM-yy');
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  const colIdx = headers.indexOf(monthLabel);
+  if (colIdx === -1) return null;
+
+  const col = colIdx + 1;
+  return {
+    label: monthLabel.split('-')[0],
+    truckLoads: sh.getRange(3, col).getValue() || 0,
+    margin: sh.getRange(6, col).getValue() || 0,
+    swing: sh.getRange(8, col).getValue() || 0
   };
 }
 
@@ -309,6 +745,16 @@ textarea{min-height:64px}
 .msg{position:fixed;left:12px;right:12px;bottom:16px;background:var(--org);color:#1A1A1A;padding:12px;border-radius:5px;font-weight:600;text-align:center;display:none;z-index:50}
 .empty{text-align:center;color:#8d8d8d;padding:40px 12px;font-size:.9rem}
 .spin{text-align:center;color:var(--org);padding:30px;font-weight:600}
+.warn{color:var(--org)}
+.picker{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:60;display:none;align-items:flex-end;justify-content:center}
+.picker.on{display:flex}
+.picker-sheet{background:var(--drk);border-top:3px solid var(--org);border-radius:12px 12px 0 0;padding:16px;width:100%;max-width:480px;max-height:70vh;overflow-y:auto}
+.picker-title{font-weight:700;margin-bottom:10px;font-size:1rem}
+.picker-opts{display:flex;flex-direction:column;gap:8px}
+.qbind{display:none;background:var(--mid);padding:10px;border-radius:4px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:8px}
+.qbind.on{display:flex}
+.pline{padding:0 0 10px;color:var(--sof);font-size:.88rem}
+.pline b{color:#fff}
 </style></head><body>
 
 <header><h1>MRTH <span>Jobs</span></h1></header>
@@ -322,6 +768,7 @@ textarea{min-height:64px}
 <div class="wrap">
 
   <div id="v-jobs">
+    <div class="pline" id="pline"></div>
     <div class="filters" id="filters"></div>
     <div id="list"><div class="spin">Loading…</div></div>
   </div>
@@ -339,10 +786,18 @@ textarea{min-height:64px}
     <label>When</label>
     <select id="n-when"><option>This week</option><option>Next week</option><option>Within a month</option><option>Just pricing</option></select>
     <label>Access / notes</label><textarea id="n-notes"></textarea>
+    <label>Source</label>
+    <select id="n-source"><option value="">—</option><option>FB ad</option><option>FB group post</option><option>Marketplace</option><option>Google</option><option>Website</option><option>Repeat customer</option><option>Referral</option><option>Word of mouth</option><option>Other</option></select>
+    <label>Customer type</label>
+    <select id="n-custtype"><option value="">—</option><option>Trade</option><option>Repeat</option><option>One-off</option></select>
     <div class="acts"><button class="btn org" id="saveNew">Save enquiry</button></div>
   </div>
 
   <div id="v-quote" style="display:none">
+    <div class="qbind" id="q-bind">
+      <span id="q-bind-txt"></span>
+      <button class="btn gh" style="flex:none;padding:6px 10px" onclick="clearQuoteBinding()">Clear</button>
+    </div>
     <div class="filters">
       <div class="chip on" id="qm-load">Per load</div>
       <div class="chip" id="qm-truck">Truck load (10t)</div>
@@ -365,6 +820,7 @@ textarea{min-height:64px}
       <div class="out" id="q-out"></div>
       <div class="acts" style="margin-top:12px">
         <button class="btn org" id="q-copy">Copy quote message</button>
+        <button class="btn" id="q-save" style="display:none" onclick="saveLoadQuoteToJob()">Save to job</button>
       </div>
     </div>
 
@@ -374,7 +830,16 @@ textarea{min-height:64px}
       <div class="out" id="qt-out"></div>
       <div class="acts" style="margin-top:12px">
         <button class="btn org" id="qt-copy">Copy quote message</button>
+        <button class="btn" id="qt-save" style="display:none" onclick="saveTruckQuoteToJob()">Save to job</button>
       </div>
+    </div>
+  </div>
+
+  <div class="picker" id="picker">
+    <div class="picker-sheet">
+      <div class="picker-title" id="pk-title"></div>
+      <div class="picker-opts" id="pk-opts"></div>
+      <button class="btn" id="pk-skip" onclick="pickerSkip()" style="display:none;margin-top:8px">Skip (use Other)</button>
     </div>
   </div>
 
@@ -396,10 +861,46 @@ textarea{min-height:64px}
 
 <script>
 var JOBS = [], PRICES = {}, FILTER = 'Active', OPEN = null;
-var STATUSES = ['New','Quoted','Paid','Booked','Delivered','Closed'];
+var STATUSES = ['New','Quoted','Paid','Booked','Delivered','Closed','Declined','Lost'];
+var SOURCES = ['FB ad','FB group post','Marketplace','Google','Website','Repeat customer','Referral','Word of mouth','Other'];
+var CUSTOMER_TYPES = ['Trade','Repeat','One-off'];
+var LANES = ['Trailer single','Trailer double','Truck 10t (NCJ)','Truck 10t (other carrier)','Truck 20t+'];
+var UNITS = ['t','m3'];
+var LOST_REASONS = ['Price','No reply','Away on swing','No carrier','Other'];
 
 function toast(t){var e=document.getElementById('toast');e.textContent=t;e.style.display='block';
   setTimeout(function(){e.style.display='none';},2200);}
+
+function getJob(row){ return JOBS.filter(function(x){return x.row===row;})[0]; }
+
+/* ---------- PICKER (one-tap chooser for dropdown-constrained fields) ---------- */
+var PICKER_OPTS = [], PICKER_CB = null, PICKER_SKIP = null;
+function openPicker(title, options, cb, skipDefault){
+  PICKER_OPTS = options; PICKER_CB = cb; PICKER_SKIP = skipDefault || null;
+  document.getElementById('pk-title').textContent = title;
+  document.getElementById('pk-opts').innerHTML = options.map(function(o,i){
+    return '<button class="btn gh" onclick="pickerChoose('+i+')">'+esc(o)+'</button>';
+  }).join('');
+  document.getElementById('pk-skip').style.display = skipDefault ? '' : 'none';
+  document.getElementById('picker').classList.add('on');
+}
+function pickerChoose(i){
+  document.getElementById('picker').classList.remove('on');
+  var cb=PICKER_CB; PICKER_CB=null;
+  if(cb) cb(PICKER_OPTS[i]);
+}
+function pickerSkip(){
+  document.getElementById('picker').classList.remove('on');
+  var cb=PICKER_CB, def=PICKER_SKIP; PICKER_CB=null;
+  if(cb && def) cb(def);
+}
+function pickerCancel(){
+  document.getElementById('picker').classList.remove('on');
+  PICKER_CB=null;
+}
+document.getElementById('picker').addEventListener('click',function(e){
+  if(e.target.id==='picker') pickerCancel();
+});
 
 /* tabs */
 document.querySelectorAll('.tab').forEach(function(tb){
@@ -427,7 +928,7 @@ function drawFilters(){
 function visible(){
   if(FILTER==='All') return JOBS;
   if(FILTER==='Active') return JOBS.filter(function(j){
-    return j.status!=='Delivered' && j.status!=='Closed';});
+    return j.status!=='Delivered' && j.status!=='Closed' && j.status!=='Declined' && j.status!=='Lost';});
   return JOBS.filter(function(j){return j.status===FILTER;});
 }
 
@@ -455,6 +956,15 @@ function drawList(){
       + (j.invoiceNo?'<div class="kv">Invoice: <b>'+esc(j.invoiceNo)+'</b>'+(j.invoiceLink?' — <a href="'+j.invoiceLink+'" target="_blank" style="color:inherit">PDF</a>':'')+'</div>':'')
       + (j.startDate?'<div class="kv">Hire dates: <b>'+esc(j.startDate)+(j.endDate?' to '+esc(j.endDate):'')+'</b></div>':'')
       + (j.scheduled?'<div class="kv">Scheduled: <b>'+esc(j.scheduled)+'</b></div>':'')
+      + (j.source?'<div class="kv">Source: <b>'+esc(j.source)+'</b></div>':'')
+      + (j.custType?'<div class="kv">Customer: <b>'+esc(j.custType)+'</b></div>':'')
+      + (j.lane?'<div class="kv">Lane: <b>'+esc(j.lane)+'</b></div>':'')
+      + (j.pqty?'<div class="kv">Qty: <b>'+esc(j.pqty)+' '+esc(j.unit)+'</b></div>':'')
+      + (j.cost!==''?'<div class="kv">Cost ex GST: <b>$'+esc(j.cost)+'</b></div>':(j.pqty?'<div class="kv warn">⚠ No cost set — add one on the Pricing tab</div>':''))
+      + (j.sell!==''?'<div class="kv">Sell ex GST: <b>$'+esc(j.sell)+'</b></div>':'')
+      + (j.margin!==''?'<div class="kv">Margin ex GST: <b>$'+esc(j.margin)+'</b></div>':'')
+      + (j.lostReason?'<div class="kv">Lost reason: <b>'+esc(j.lostReason)+'</b></div>':'')
+      + (j.closedDate?'<div class="kv">Closed: <b>'+esc(j.closedDate)+'</b></div>':'')
       + '<div class="acts">'
       + (tel?'<a class="btn" href="'+tel+'">Call</a>':'')
       + (sms?'<a class="btn" href="'+sms+'">Text</a>':'')
@@ -463,7 +973,14 @@ function drawList(){
       + '<button class="btn gh" onclick="setAddress('+j.row+')">Address</button>'
       + '<button class="btn gh" onclick="setJobDate('+j.row+')">Date</button>'
       + '<button class="btn gh" onclick="setNote('+j.row+')">Note</button>'
+      + '<button class="btn gh" onclick="setSourceField('+j.row+')">Source</button>'
+      + '<button class="btn gh" onclick="setCustType('+j.row+')">Cust.</button>'
+      + '<button class="btn gh" onclick="setQtyUnit('+j.row+')">Qty</button>'
+      + '<button class="btn gh" onclick="setLaneField('+j.row+')">Lane</button>'
+      + '<button class="btn gh" onclick="quoteForJob('+j.row+')">Quote</button>'
       + '<button class="btn org" onclick="genInvoice('+j.row+')">Invoice</button>'
+      + '<button class="btn gh" onclick="declineJob('+j.row+')">Declined</button>'
+      + '<button class="btn gh" onclick="loseJob('+j.row+')">Lost</button>'
       + '</div>'
       + '<div class="stat">' + STATUSES.map(function(s){
           return '<div class="sbtn'+(j.status===s?' on':'')+'" onclick="setStatus('+j.row+',\\''+s+'\\')">'+s+'</div>';
@@ -496,7 +1013,30 @@ function save(row,field,val,label){
   }).withFailureHandler(function(e){toast('Failed: '+e.message);})
    .updateJob(row,field,val);
 }
-function setStatus(row,s){ save(row,'Status',s,s); }
+function setStatus(row,s){
+  if(s==='Declined'||s==='Lost'){ openPicker(s+' — reason?', LOST_REASONS, function(r){ finishClose(row,s,r); }, 'Other'); return; }
+  save(row,'Status',s,s);
+}
+function declineJob(row){ openPicker('Declined — reason?', LOST_REASONS, function(r){ finishClose(row,'Declined',r); }, 'Other'); }
+function loseJob(row){ openPicker('Lost — reason?', LOST_REASONS, function(r){ finishClose(row,'Lost',r); }, 'Other'); }
+function finishClose(row,status,reason){
+  google.script.run.withSuccessHandler(function(){
+    var j=getJob(row); if(j){ j.status=status; j.lostReason=reason; }
+    toast(status+' — '+reason); load(); loadPipelineLine();
+  }).withFailureHandler(function(e){toast('Failed: '+e.message);}).closeJob(row,status,reason);
+}
+function setSourceField(row){ openPicker('Source', SOURCES, function(v){ save(row,'Source',v,'Source saved'); }); }
+function setCustType(row){ openPicker('Customer type', CUSTOMER_TYPES, function(v){ save(row,'Customer type',v,'Customer type saved'); }); }
+function setLaneField(row){ openPicker('Lane', LANES, function(v){ save(row,'Lane',v,'Lane saved'); }); }
+function setQtyUnit(row){
+  var j=getJob(row);
+  var q=prompt('Qty', j?j.pqty:''); if(q===null) return;
+  openPicker('Unit', UNITS, function(u){
+    save(row,'Unit',u,'Unit saved');
+    save(row,'Qty',q,'Qty saved');
+    setTimeout(load,400);
+  });
+}
 function setQuoted(row){ var v=prompt('Quoted amount ($)'); if(v!==null) save(row,'Quoted $',v,'Quote saved'); }
 function setCarrier(row){ var v=prompt('Carrier / driver'); if(v!==null) save(row,'Carrier',v,'Carrier saved'); }
 function setAddress(row){
@@ -590,6 +1130,14 @@ function load(){
   }).getJobs();
 }
 
+function loadPipelineLine(){
+  google.script.run.withSuccessHandler(function(p){
+    var el=document.getElementById('pline');
+    if(!p){ el.textContent=''; return; }
+    el.innerHTML='<b>'+esc(p.label)+':</b> '+p.truckLoads+' truck loads · $'+Math.round(p.margin)+' margin · '+p.swing+' lost to swing';
+  }).withFailureHandler(function(){}).getPipelineSummary();
+}
+
 /* ---------- NEW ENQUIRY ---------- */
 document.getElementById('saveNew').onclick=function(){
   var o={
@@ -600,7 +1148,9 @@ document.getElementById('saveNew').onclick=function(){
     quantity:document.getElementById('n-qty').value,
     suburb:document.getElementById('n-suburb').value,
     timeframe:document.getElementById('n-when').value,
-    notes:document.getElementById('n-notes').value
+    notes:document.getElementById('n-notes').value,
+    source:document.getElementById('n-source').value,
+    custType:document.getElementById('n-custtype').value
   };
   if(!o.name && !o.phone){toast('Add a name or number');return;}
   this.textContent='Saving…'; this.disabled=true;
@@ -608,8 +1158,10 @@ document.getElementById('saveNew').onclick=function(){
   google.script.run.withSuccessHandler(function(){
     ['n-name','n-phone','n-material','n-qty','n-suburb','n-notes'].forEach(function(id){
       document.getElementById(id).value='';});
+    document.getElementById('n-source').value='';
+    document.getElementById('n-custtype').value='';
     btn.textContent='Save enquiry'; btn.disabled=false;
-    toast('Enquiry added'); load();
+    toast('Enquiry added'); load(); loadPipelineLine();
     document.querySelector('.tab[data-t="jobs"]').click();
   }).withFailureHandler(function(e){
     btn.textContent='Save enquiry'; btn.disabled=false; toast('Failed: '+e.message);
@@ -617,6 +1169,23 @@ document.getElementById('saveNew').onclick=function(){
 };
 
 /* ---------- QUOTE ---------- */
+var QUOTE_ROW = null;
+function quoteForJob(row){
+  QUOTE_ROW = row;
+  var j = getJob(row);
+  document.getElementById('q-bind-txt').textContent = 'Quoting for: ' + (j && j.name ? j.name : 'this job');
+  document.getElementById('q-bind').classList.add('on');
+  document.getElementById('q-save').style.display = '';
+  document.getElementById('qt-save').style.display = '';
+  document.querySelector('.tab[data-t="quote"]').click();
+}
+function clearQuoteBinding(){
+  QUOTE_ROW = null;
+  document.getElementById('q-bind').classList.remove('on');
+  document.getElementById('q-save').style.display = 'none';
+  document.getElementById('qt-save').style.display = 'none';
+}
+
 function buildMats(){
   google.script.run.withSuccessHandler(function(p){
     PRICES=p; var sel=document.getElementById('q-mat'); sel.innerHTML='';
@@ -675,6 +1244,32 @@ document.getElementById('q-copy').onclick=function(){
   document.body.removeChild(ta);
 };
 
+function saveLoadQuoteToJob(){
+  if(!QUOTE_ROW){ toast('Open this from a job\\'s Quote button first'); return; }
+  var sel=document.getElementById('q-mat'); var o=sel.options[sel.selectedIndex];
+  if(!o){ toast('Pick a material first'); return; }
+  var price=+o.dataset.price, unit=o.dataset.unit, dens=+o.dataset.dens;
+  var L=+document.getElementById('q-l').value, W=+document.getElementById('q-w').value,
+      D=+document.getElementById('q-d').value, amt=+document.getElementById('q-amt').value,
+      au=document.getElementById('q-unit').value, del=+document.getElementById('q-del').value;
+  var m3=0,t=0;
+  if(amt>0){ if(au==='m3'){m3=amt; t=dens?amt*dens:0;} else {t=amt; m3=dens?amt/dens:amt;} }
+  else if(L>0&&W>0&&D>0){ m3=L*W*(D/1000); t=dens?m3*dens:0; }
+  if(m3<=0){ toast('Enter a quantity first'); return; }
+  var bill=(unit==='t')?t:m3;
+  var mat=bill*price;
+  var tot=Math.round(mat+(del>0?del:0));
+  // No lane guess from tonnage — the per-load calculator is trailer
+  // stock; the server defaults to a trailer lane unless this job is
+  // already Type "Trailer hire". Truck lanes only ever come from the
+  // truck-load tab's own six NCJ products.
+  google.script.run.withSuccessHandler(function(r){
+    toast(r.costFound?'Saved to job':'Saved — no cost set for this product yet');
+    load(); loadPipelineLine();
+  }).withFailureHandler(function(e){toast('Failed: '+e.message);})
+   .saveQuoteToJob(QUOTE_ROW,{product:o.value,qty:Math.round(bill*100)/100,unit:unit,total:tot});
+}
+
 /* ---------- TRUCK LOAD (10t flat price) ---------- */
 document.getElementById('qm-load').onclick=function(){ setQuoteMode('load'); };
 document.getElementById('qm-truck').onclick=function(){ setQuoteMode('truck'); };
@@ -732,7 +1327,22 @@ document.getElementById('qt-copy').onclick=function(){
   document.body.removeChild(ta);
 };
 
-load(); buildMats(); buildTruckMats();
+function saveTruckQuoteToJob(){
+  if(!QUOTE_ROW){ toast('Open this from a job\\'s Quote button first'); return; }
+  var matName=document.getElementById('qt-mat').value;
+  var zoneName=document.getElementById('qt-zone').value;
+  var zoneIdx=TRUCK.zones.indexOf(zoneName);
+  var row=TRUCK.materials.filter(function(m){return m[0]===matName;})[0];
+  if(!row||zoneIdx===-1){ toast('Pick a standard zone first'); return; }
+  var price=row[zoneIdx+1];
+  google.script.run.withSuccessHandler(function(r){
+    toast(r.costFound?'Saved to job':'Saved — no cost set for this product yet');
+    load(); loadPipelineLine();
+  }).withFailureHandler(function(e){toast('Failed: '+e.message);})
+   .saveQuoteToJob(QUOTE_ROW,{product:matName,qty:10,unit:'t',lane:'Truck 10t (NCJ)',total:price});
+}
+
+load(); buildMats(); buildTruckMats(); loadPipelineLine();
 </script>
 </body></html>
 `;

@@ -58,7 +58,8 @@ function handleBooking_(data) {
     "Timeframe": isTrailer ? (start + (end ? " to " + end : "")) : start,
     "Notes": data["Notes"] || "",
     "Start Date": start,
-    "End Date": isTrailer ? end : ""
+    "End Date": isTrailer ? end : "",
+    "Source": "Website"
   });
 
   return ContentService

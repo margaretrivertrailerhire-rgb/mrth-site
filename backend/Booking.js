@@ -55,7 +55,9 @@ const REQUIRED_ENQUIRY_COLS = [
   "Material", "Quantity", "Suburb", "Timeframe", "Access notes",
   "Quoted $", "Notes", "Carrier", "Load Type", "Delivery address",
   "Paid date", "Delivered date", "Invoice No", "Invoice Link",
-  "Start Date", "End Date"
+  "Start Date", "End Date",
+  "Source", "Customer type", "Lane", "Qty", "Unit", "Cost ex GST",
+  "Sell ex GST", "Margin ex GST", "Lost reason", "Closed date", "Month"
 ];
 
 /** Health check — visit the web app URL in a browser to confirm it's live. */
@@ -101,6 +103,7 @@ function handleEnquiry_(d) {
     "Timeframe": d.timeframe || "",
     "Access notes": d.access || "",
     "Load Type": d.loadType || "",
+    "Source": "Website",
   });
   sendAlert_(d);
 
