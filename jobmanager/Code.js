@@ -1143,6 +1143,7 @@ function drawList(){
       + '<button class="btn gh" onclick="quoteForJob('+j.row+')">Quote</button>'
       + '<button class="btn org" onclick="genInvoice('+j.row+')">Invoice</button>'
       + (j.invoiceNo?'<button class="btn gh" onclick="shareInvoice('+j.row+')">Share PDF</button>':'')
+      + (j.invoiceNo?'<button class="btn gh" onclick="unshareInvoice('+j.row+')">Unshare</button>':'')
       + '<button class="btn gh" onclick="declineJob('+j.row+')">Declined</button>'
       + '<button class="btn gh" onclick="loseJob('+j.row+')">Lost</button>'
       + '</div>'
@@ -1259,6 +1260,14 @@ function shareInvoice(row){
       copyText(s.shareText,'Link copied — paste it into a text');
     }
   }).withFailureHandler(function(e){toast('Failed: '+e.message);}).getInvoiceShareLink(row);
+}
+
+function unshareInvoice(row){
+  var j=getJob(row);
+  if(!confirm('Make invoice '+(j&&j.invoiceNo?j.invoiceNo:'')+' private again?\\n\\n'
+    +'Anyone you already sent the link to will get an access-denied page instead of the PDF.')) return;
+  google.script.run.withSuccessHandler(function(r){toast(r.invoiceNumber+' is private again');})
+    .withFailureHandler(function(e){toast('Failed: '+e.message);}).revokeInvoiceShare(row);
 }
 
 function genInvoice(row){

@@ -644,6 +644,23 @@ function getInvoiceShareLink(row) {
   };
 }
 
+/**
+ * Puts a shared invoice PDF back to private — the counterpart to
+ * getInvoiceShareLink. Anyone still holding the old link gets an
+ * access screen from then on. Safe to run on a file that was never
+ * shared in the first place.
+ */
+function revokeInvoiceShare(row) {
+  const ctx = readJobRow_(row);
+  const invoiceNumber = String(ctx.get('Invoice No') || '').trim();
+  const link = String(ctx.get('Invoice Link') || '').trim();
+  if (!invoiceNumber || !link) throw new Error('No invoice has been generated for this job yet.');
+
+  DriveApp.getFileById(extractDriveFileId_(link))
+    .setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+  return { invoiceNumber: invoiceNumber };
+}
+
 function extractDriveFileId_(url) {
   const m = String(url).match(/[-\w]{25,}/);
   if (!m) throw new Error('Could not read a Drive file ID from the saved invoice link.');
