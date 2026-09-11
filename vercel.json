@@ -3,6 +3,10 @@
     { "source": "/trailer-hire.html", "destination": "/#hire", "permanent": true },
     { "source": "/trailer-hire", "destination": "/#hire", "permanent": true },
     { "source": "/materials.html", "destination": "/#prices", "permanent": true },
-    { "source": "/materials", "destination": "/#prices", "permanent": true }
+    { "source": "/materials", "destination": "/#prices", "permanent": true },
+    { "source": "/fb", "destination": "/?utm_source=facebook&utm_medium=post", "permanent": false },
+    { "source": "/mp", "destination": "/?utm_source=facebook&utm_medium=marketplace", "permanent": false },
+    { "source": "/msg", "destination": "/?utm_source=facebook&utm_medium=messenger", "permanent": false },
+    { "source": "/g", "destination": "/?utm_source=google&utm_medium=gbp", "permanent": false }
   ]
 }
