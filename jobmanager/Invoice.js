@@ -607,6 +607,35 @@ function createInvoiceEmailDraft(row) {
   return true;
 }
 
+/**
+ * Makes an already-generated invoice PDF shareable and hands back the link.
+ *
+ * Drive files are created private, so the Invoice Link stored on the row
+ * only opens for the account that made it — send that to a customer and
+ * they get a "request access" screen instead of their invoice. This flips
+ * the file to view-by-link at the moment of sharing rather than exposing
+ * every invoice at generation time, so only the ones actually sent out
+ * become readable by anyone holding the URL.
+ */
+function getInvoiceShareLink(row) {
+  const ctx = readJobRow_(row);
+  const invoiceNumber = String(ctx.get('Invoice No') || '').trim();
+  const link = String(ctx.get('Invoice Link') || '').trim();
+  if (!invoiceNumber || !link) throw new Error('No invoice has been generated for this job yet.');
+
+  const file = DriveApp.getFileById(extractDriveFileId_(link));
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  const title = gstAppliesOn(resolveSupplyDate_(ctx).date) ? 'Tax Invoice' : 'Invoice';
+  const url = file.getUrl();
+  return {
+    url: url,
+    title: title,
+    invoiceNumber: invoiceNumber,
+    shareText: title + ' ' + invoiceNumber + ' from ' + INVOICE_CONFIG.TRADING_SHORT + '\n' + url
+  };
+}
+
 function extractDriveFileId_(url) {
   const m = String(url).match(/[-\w]{25,}/);
   if (!m) throw new Error('Could not read a Drive file ID from the saved invoice link.');

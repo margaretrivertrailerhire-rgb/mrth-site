@@ -1142,6 +1142,7 @@ function drawList(){
       + '<button class="btn gh" onclick="setPayMethod('+j.row+')">Paid by</button>'
       + '<button class="btn gh" onclick="quoteForJob('+j.row+')">Quote</button>'
       + '<button class="btn org" onclick="genInvoice('+j.row+')">Invoice</button>'
+      + (j.invoiceNo?'<button class="btn gh" onclick="shareInvoice('+j.row+')">Share PDF</button>':'')
       + '<button class="btn gh" onclick="declineJob('+j.row+')">Declined</button>'
       + '<button class="btn gh" onclick="loseJob('+j.row+')">Lost</button>'
       + '</div>'
@@ -1233,6 +1234,33 @@ function setJobDate(row){
 }
 
 /* ---------- INVOICE ---------- */
+function copyText(t,okMsg){
+  var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
+  ta.select();
+  try{document.execCommand('copy');toast(okMsg||'Copied');}catch(e){toast('Copy failed');}
+  document.body.removeChild(ta);
+}
+
+// The app runs inside Apps Script's sandboxed iframe, which doesn't carry
+// the web-share permission policy, so navigator.share is usually
+// unavailable or rejects here — the clipboard path is the one that
+// actually runs most of the time, not a rare fallback.
+function shareInvoice(row){
+  toast('Preparing link…');
+  google.script.run.withSuccessHandler(function(s){
+    if(navigator.share){
+      navigator.share({title:s.title+' '+s.invoiceNumber,text:s.shareText,url:s.url})
+        .then(function(){toast('Shared');})
+        .catch(function(err){
+          if(err && err.name==='AbortError') return; // user closed the share sheet
+          copyText(s.shareText,'Link copied — paste it into a text');
+        });
+    } else {
+      copyText(s.shareText,'Link copied — paste it into a text');
+    }
+  }).withFailureHandler(function(e){toast('Failed: '+e.message);}).getInvoiceShareLink(row);
+}
+
 function genInvoice(row){
   google.script.run.withSuccessHandler(function(p){
     var lines=[];
