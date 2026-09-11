@@ -397,9 +397,14 @@ function renderInvoiceHtml_(m) {
 
     'table.hdr { width: 100%; margin-bottom: 10px; }' +
     'table.hdr td { vertical-align: top; }' +
-    'td.logo img { width: 35mm; display: block; }' +
+    'td.logo { width: 68mm; }' +
+    'td.logo img { width: 64mm; display: block; }' +
     'td.ident { text-align: right; font-size: 8.5pt; line-height: 1.5; }' +
-    'td.ident .nm { font-size: 11pt; font-weight: bold; }' +
+    // The logo already carries the wordmark, so the name is set small here
+    // rather than as a second competing headline — it stays as text because
+    // an invoice whose only supplier identity is inside an image has none
+    // at all if that image fails to render.
+    'td.ident .nm { font-size: 9pt; font-weight: bold; }' +
     '.rule { border-bottom: 2.5pt solid ' + INVOICE_CONFIG.ORANGE + '; margin-bottom: 16px; }' +
 
     'h1.doc { font-size: 16pt; margin: 0 0 10px; font-weight: bold; letter-spacing: 0.3px; }' +
