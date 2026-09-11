@@ -623,16 +623,24 @@ function getInvoiceShareLink(row) {
   const link = String(ctx.get('Invoice Link') || '').trim();
   if (!invoiceNumber || !link) throw new Error('No invoice has been generated for this job yet.');
 
-  const file = DriveApp.getFileById(extractDriveFileId_(link));
+  const fileId = extractDriveFileId_(link);
+  const file = DriveApp.getFileById(fileId);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
+  // file.getUrl() is Drive's /view page — on a phone that deep-links into
+  // the Drive app and asks for a sign-in, which is no use to a customer
+  // (or to anyone with a screen lock on Drive). The uc?export=download
+  // endpoint hands back the PDF bytes instead, so it opens in whatever
+  // PDF viewer the recipient already has, no Google account involved.
+  const downloadUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+
   const title = gstAppliesOn(resolveSupplyDate_(ctx).date) ? 'Tax Invoice' : 'Invoice';
-  const url = file.getUrl();
   return {
-    url: url,
+    url: downloadUrl,
+    viewUrl: file.getUrl(),
     title: title,
     invoiceNumber: invoiceNumber,
-    shareText: title + ' ' + invoiceNumber + ' from ' + INVOICE_CONFIG.TRADING_SHORT + '\n' + url
+    shareText: title + ' ' + invoiceNumber + ' from ' + INVOICE_CONFIG.TRADING_SHORT + '\n' + downloadUrl
   };
 }
 
