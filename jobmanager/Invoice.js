@@ -16,6 +16,7 @@ const INVOICE_CONFIG = {
   BUSINESS_NAME: 'MR Trailer Hire & Landscape Delivery', // exact ASIC-registered name (8 Sept 2026)
   TRADING_SHORT: 'MR Trailer Hire',
   ABN: '60 322 641 541',
+  PHONE: '0429 016 758',
   EMAIL: 'margaretrivertrailerhire@gmail.com',
   WEBSITE: 'margaretrivertrailerhire.com.au',
 
@@ -224,6 +225,36 @@ function findPricingMatch_(ctx) {
 // Invoice assembly
 // ---------------------------------------------------------------------------
 
+/** How many tonnes a trailer load can carry before it should really be
+ *  described by volume instead. Matches the figure quoted on the website. */
+const TRAILER_TONNE_LIMIT = 2.4;
+
+/**
+ * The job's quantity as a number plus a unit, for the invoice's Qty/Unit
+ * columns. Prefers the structured Qty/Unit fields the quoter writes;
+ * falls back to reading them out of the free-text Quantity field
+ * ("4 m3", "2.5 t") for jobs entered before those existed or typed by
+ * hand. Returns blank qty when neither yields a number, in which case
+ * the caller keeps the free text in the description instead.
+ */
+function resolveQuantity_(ctx) {
+  const norm = function (u) {
+    u = String(u || '').trim().toLowerCase();
+    if (u === 't' || u === 'tonne' || u === 'tonnes') return 't';
+    if (u === 'm3' || u === 'm³' || u === 'cube' || u === 'cubes') return 'm3';
+    return '';
+  };
+  var qty = parseFloat(ctx.get('Qty'));
+  var unit = norm(ctx.get('Unit'));
+
+  if (isNaN(qty) || qty <= 0) {
+    const m = String(ctx.get('Quantity') || '').match(/([\d.]+)\s*(tonnes|tonne|m3|m³|cubes|cube|t)\b/i);
+    if (m) { qty = parseFloat(m[1]); unit = norm(m[2]); }
+  }
+  if (isNaN(qty) || qty <= 0) return { qty: 0, unit: '', tonnes: 0 };
+  return { qty: qty, unit: unit, tonnes: unit === 't' ? qty : 0 };
+}
+
 /**
  * Builds the invoice model from a job row. Sheet prices are the final
  * amount the customer pays — when GST applies, that amount is
@@ -239,14 +270,21 @@ function buildInvoiceModel_(ctx, invoiceNumberFormatted) {
 
   const material = String(ctx.get('Material') || '').trim();
   const type = String(ctx.get('Type') || '').trim();
-  const qty = String(ctx.get('Quantity') || '').trim();
+  const qtyText = String(ctx.get('Quantity') || '').trim();
   const loadType = String(ctx.get('Load Type') || '').trim();
+  const lane = String(ctx.get('Lane') || '').trim();
   const address = String(ctx.get('Delivery address') || '').trim() || String(ctx.get('Suburb') || '').trim();
 
+  const measure = resolveQuantity_(ctx);
+
   var description = material || type || 'Materials delivery';
-  const bits = [qty, loadType].filter(Boolean).join(' — ');
-  if (bits) description += ' — ' + bits;
-  if (address) description += '\nDelivered to ' + address;
+  if (loadType) description += ' — ' + loadType;
+  // Only fold the free-text quantity back into the description when it
+  // couldn't be split into its own Qty/Unit columns, so it isn't printed twice.
+  if (!measure.qty && qtyText) description += ' — ' + qtyText;
+  // The address isn't repeated here — it already prints in the "Billed to"
+  // block, and both read from the same field, so a "Delivered to" line
+  // would print the same string twice on a one-page invoice.
 
   const pricingMatch = findPricingMatch_(ctx);
 
@@ -261,7 +299,11 @@ function buildInvoiceModel_(ctx, invoiceNumberFormatted) {
     customerEmail: String(ctx.get('Email') || '').trim(),
     customerPhone: String(ctx.get('Phone') || '').trim(),
     customerAddress: address,
-    lines: [{ description: description, amount: total }],
+    lane: lane,
+    qty: measure.qty,
+    unit: measure.unit,
+    tonnes: measure.tonnes,
+    lines: [{ description: description, qty: measure.qty, unit: measure.unit, amount: total }],
     rawQuoted: rawQuoted,
     total: total,
     gstAmount: gstAmount,
@@ -288,6 +330,10 @@ function validateModel_(m) {
   if (m.gst && m.total >= 1000 && !m.customerName) {
     problems.push('Tax invoices of $1,000 or more must identify the buyer — this job has no name.');
   }
+  if (/^trailer/i.test(m.lane || '') && m.tonnes > TRAILER_TONNE_LIMIT) {
+    problems.push('Trailer load billed as ' + m.tonnes + ' t — over the ' + TRAILER_TONNE_LIMIT +
+      ' t a trailer carries. Above that a trailer load should be described by volume (m³), not weight.');
+  }
   return problems;
 }
 
@@ -296,9 +342,24 @@ function validateModel_(m) {
 // ---------------------------------------------------------------------------
 
 function renderInvoiceHtml_(m) {
+  const fmtQty = function (n) {
+    if (!n) return '';
+    return String(Math.round(n * 100) / 100);
+  };
+  const unitLabel = function (u) {
+    return u === 'm3' ? 'm&sup3;' : escapeHtml_(u || '');
+  };
+
   const linesHtml = m.lines.map(function (l) {
+    const parts = String(l.description).split('\n');
+    const head = escapeHtml_(parts[0]);
+    const rest = parts.slice(1).map(function (p) {
+      return '<div class="sub">' + escapeHtml_(p) + '</div>';
+    }).join('');
     return '<tr>' +
-      '<td class="desc">' + escapeHtml_(l.description).replace(/\n/g, '<br><span class="sub">') + '</td>' +
+      '<td>' + head + rest + '</td>' +
+      '<td class="num">' + fmtQty(l.qty) + '</td>' +
+      '<td class="num">' + unitLabel(l.unit) + '</td>' +
       '<td class="amt">' + money_(l.amount) + '</td>' +
       '</tr>';
   }).join('');
@@ -310,16 +371,16 @@ function renderInvoiceHtml_(m) {
     : '<tr class="grand"><td>Total</td><td class="amt">' + money_(m.total) + '</td></tr>';
 
   const gstNote = m.gst
-    ? '<p class="note">Total includes GST of ' + money_(m.gstAmount) + '.</p>'
-    : '<p class="note">' + INVOICE_CONFIG.TRADING_SHORT + ' is not registered for GST. No GST has been charged on this invoice.</p>';
+    ? 'Total includes GST of ' + money_(m.gstAmount) + '.'
+    : INVOICE_CONFIG.TRADING_SHORT + ' is not registered for GST. No GST has been charged on this invoice.';
 
-  var payment = '<p class="note">' + escapeHtml_(INVOICE_CONFIG.PAYMENT_TERMS) + '</p>';
+  var payLines = '<div class="pay-line">' + escapeHtml_(INVOICE_CONFIG.PAYMENT_TERMS) + '</div>';
   if (m.stripeLink) {
-    payment += '<p class="note">Pay by card or Apple Pay: <a href="' + m.stripeLink + '">' + m.stripeLink + '</a></p>';
+    payLines += '<div class="pay-line">Card or Apple Pay: ' + escapeHtml_(m.stripeLink) + '</div>';
   }
   if (INVOICE_CONFIG.PAYID) {
-    payment += '<p class="note">Or PayID: ' + escapeHtml_(INVOICE_CONFIG.PAYID) +
-      ' — reference ' + m.invoiceNumber + '</p>';
+    payLines += '<div class="pay-line">PayID: ' + escapeHtml_(INVOICE_CONFIG.PAYID) +
+      ' &nbsp;—&nbsp; reference ' + escapeHtml_(m.invoiceNumber) + '</div>';
   }
 
   const buyerBlock = [
@@ -330,57 +391,85 @@ function renderInvoiceHtml_(m) {
   ].filter(Boolean).join('<br>');
 
   return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' +
-    '@page { size: A4; margin: 18mm 16mm; }' +
-    'body { font-family: Helvetica, Arial, sans-serif; color: ' + INVOICE_CONFIG.DARK + '; font-size: 11pt; line-height: 1.5; }' +
-    '.head { border-bottom: 3px solid ' + INVOICE_CONFIG.ORANGE + '; padding-bottom: 14px; margin-bottom: 26px; }' +
-    '.biz { font-size: 15pt; font-weight: bold; letter-spacing: -0.2px; }' +
-    '.biz-meta { color: ' + INVOICE_CONFIG.GREY + '; font-size: 9.5pt; margin-top: 5px; }' +
-    '.title { float: right; text-align: right; }' +
-    '.title h1 { font-size: 17pt; margin: 0; font-weight: bold; }' +
-    '.title .num { color: ' + INVOICE_CONFIG.ORANGE + '; font-weight: bold; font-size: 11pt; margin-top: 3px; }' +
-    '.parties { width: 100%; margin-bottom: 28px; }' +
-    '.parties td { vertical-align: top; width: 50%; font-size: 10pt; }' +
-    '.lbl { color: ' + INVOICE_CONFIG.GREY + '; font-size: 8.5pt; margin-bottom: 5px; }' +
-    'table.items { width: 100%; border-collapse: collapse; margin-bottom: 4px; }' +
-    'table.items th { text-align: left; font-size: 8.5pt; color: ' + INVOICE_CONFIG.GREY + '; font-weight: normal; ' +
-      'border-bottom: 1px solid ' + INVOICE_CONFIG.DARK + '; padding-bottom: 6px; }' +
-    'table.items th.amt, table.items td.amt { text-align: right; white-space: nowrap; }' +
-    'table.items td { padding: 11px 0; border-bottom: 1px solid ' + INVOICE_CONFIG.RULE + '; vertical-align: top; }' +
-    '.sub { color: ' + INVOICE_CONFIG.GREY + '; font-size: 9.5pt; }' +
-    'table.totals { margin-left: auto; margin-top: 10px; border-collapse: collapse; min-width: 230px; }' +
-    'table.totals td { padding: 5px 0; font-size: 10.5pt; }' +
-    'table.totals .amt { text-align: right; }' +
-    'table.totals tr.grand td { border-top: 2px solid ' + INVOICE_CONFIG.DARK + '; padding-top: 9px; font-weight: bold; font-size: 12pt; }' +
-    '.note { font-size: 9.5pt; color: ' + INVOICE_CONFIG.GREY + '; margin: 6px 0; }' +
-    '.pay { margin-top: 30px; border-top: 1px solid ' + INVOICE_CONFIG.RULE + '; padding-top: 14px; }' +
-    '.foot { margin-top: 34px; font-size: 9pt; color: ' + INVOICE_CONFIG.GREY + '; }' +
+    '@page { size: A4; margin: 16mm 15mm; }' +
+    'body { font-family: Helvetica, Arial, sans-serif; color: #000; font-size: 10pt; line-height: 1.45; }' +
+    'table { border-collapse: collapse; }' +
+
+    'table.hdr { width: 100%; margin-bottom: 10px; }' +
+    'table.hdr td { vertical-align: top; }' +
+    'td.logo img { width: 35mm; display: block; }' +
+    'td.ident { text-align: right; font-size: 8.5pt; line-height: 1.5; }' +
+    'td.ident .nm { font-size: 11pt; font-weight: bold; }' +
+    '.rule { border-bottom: 2.5pt solid ' + INVOICE_CONFIG.ORANGE + '; margin-bottom: 16px; }' +
+
+    'h1.doc { font-size: 16pt; margin: 0 0 10px; font-weight: bold; letter-spacing: 0.3px; }' +
+    'table.meta { width: 100%; margin-bottom: 20px; font-size: 9.5pt; }' +
+    'table.meta td { vertical-align: top; width: 50%; padding-right: 10px; }' +
+    'table.meta .lbl { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.6px; ' +
+      'color: ' + INVOICE_CONFIG.GREY + '; padding-bottom: 3px; }' +
+    'table.meta .row { padding-bottom: 6px; }' +
+
+    'table.items { width: 100%; margin-bottom: 2px; }' +
+    'table.items th { background: #F2F2F2; text-align: left; font-size: 7.5pt; text-transform: uppercase; ' +
+      'letter-spacing: 0.6px; font-weight: bold; padding: 7px 8px; border-bottom: 0.75pt solid #CCC; }' +
+    'table.items td { padding: 9px 8px; border-bottom: 0.75pt solid #E2E2E2; vertical-align: top; }' +
+    'table.items th.num, table.items td.num { text-align: right; white-space: nowrap; width: 15mm; }' +
+    'table.items th.amt, table.items td.amt { text-align: right; white-space: nowrap; width: 26mm; }' +
+    '.sub { color: ' + INVOICE_CONFIG.GREY + '; font-size: 8.5pt; margin-top: 2px; }' +
+
+    'table.totals { margin-left: auto; margin-top: 8px; min-width: 62mm; }' +
+    'table.totals td { padding: 4px 8px; font-size: 10pt; }' +
+    'table.totals td.amt { text-align: right; white-space: nowrap; }' +
+    'table.totals tr.grand td { border-top: 1pt solid #000; padding-top: 7px; font-weight: bold; font-size: 12pt; }' +
+    '.gst-note { font-size: 8.5pt; color: ' + INVOICE_CONFIG.GREY + '; text-align: right; margin-top: 6px; }' +
+
+    '.pay { margin-top: 26px; border: 0.75pt solid #CCC; padding: 12px 14px; }' +
+    '.pay .ttl { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.6px; font-weight: bold; ' +
+      'margin-bottom: 6px; }' +
+    '.pay-line { font-size: 9.5pt; padding: 1.5px 0; }' +
+    '.review { margin-top: 10px; font-size: 8.5pt; color: ' + INVOICE_CONFIG.GREY + '; }' +
     '</style></head><body>' +
 
-    '<div class="head">' +
-      '<div class="title"><h1>' + m.title + '</h1><div class="num">' + m.invoiceNumber + '</div></div>' +
-      '<div class="biz">' + escapeHtml_(INVOICE_CONFIG.BUSINESS_NAME) + '</div>' +
-      '<div class="biz-meta">ABN ' + INVOICE_CONFIG.ABN + ' &nbsp;·&nbsp; ' + INVOICE_CONFIG.EMAIL + ' &nbsp;·&nbsp; ' + INVOICE_CONFIG.WEBSITE + '</div>' +
-      '<div style="clear:both"></div>' +
-    '</div>' +
+    '<table class="hdr"><tr>' +
+      '<td class="logo"><img src="' + INVOICE_LOGO_DATA_URI + '"></td>' +
+      '<td class="ident">' +
+        '<div class="nm">' + escapeHtml_(INVOICE_CONFIG.BUSINESS_NAME) + '</div>' +
+        '<div>ABN ' + escapeHtml_(INVOICE_CONFIG.ABN) + '</div>' +
+        '<div>' + escapeHtml_(INVOICE_CONFIG.PHONE) + '</div>' +
+        '<div>' + escapeHtml_(INVOICE_CONFIG.EMAIL) + '</div>' +
+        '<div>' + escapeHtml_(INVOICE_CONFIG.WEBSITE) + '</div>' +
+      '</td>' +
+    '</tr></table>' +
+    '<div class="rule"></div>' +
 
-    '<table class="parties"><tr>' +
-      '<td><div class="lbl">Billed to</div>' + (buyerBlock || '—') + '</td>' +
-      '<td><div class="lbl">Invoice date</div>' + fmtDate_(m.issueDate) +
-        '<div class="lbl" style="margin-top:12px">Date of supply</div>' + fmtDate_(m.supplyDate) + '</td>' +
+    '<h1 class="doc">' + escapeHtml_(m.title) + '</h1>' +
+
+    '<table class="meta"><tr>' +
+      '<td>' +
+        '<div class="row"><div class="lbl">Invoice number</div>' + escapeHtml_(m.invoiceNumber) + '</div>' +
+        '<div class="row"><div class="lbl">Invoice date</div>' + fmtDate_(m.issueDate) + '</div>' +
+        '<div class="row"><div class="lbl">Date of supply</div>' + fmtDate_(m.supplyDate) + '</div>' +
+      '</td>' +
+      '<td>' +
+        '<div class="lbl">Billed to</div>' + (buyerBlock || '—') +
+      '</td>' +
     '</tr></table>' +
 
     '<table class="items">' +
-      '<tr><th>Description</th><th class="amt">Amount</th></tr>' +
+      '<tr><th>Description</th><th class="num">Qty</th><th class="num">Unit</th><th class="amt">Amount</th></tr>' +
       linesHtml +
     '</table>' +
 
     '<table class="totals">' + totalsHtml + '</table>' +
-    gstNote +
+    '<div class="gst-note">' + escapeHtml_(gstNote) + '</div>' +
 
-    '<div class="pay">' + payment + '</div>' +
+    '<div class="pay">' +
+      '<div class="ttl">Payment</div>' +
+      payLines +
+    '</div>' +
 
-    '<div class="foot">Thanks for supporting a local business. If the delivery went well, a Google review genuinely helps: ' +
-      INVOICE_CONFIG.REVIEW_LINK + '</div>' +
+    '<div class="review">Thanks for supporting a local business. If the delivery went well, ' +
+      'a Google review genuinely helps: ' + escapeHtml_(INVOICE_CONFIG.REVIEW_LINK) + '</div>' +
 
     '</body></html>';
 }

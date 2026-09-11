@@ -47,7 +47,8 @@ const REQUIRED_COLS = [
   'Delivery address','Paid date','Delivered date','Invoice No','Invoice Link',
   'Scheduled date','Start Date','End Date','Calendar Event ID',
   'Source','Customer type','Lane','Qty','Unit','Cost ex GST','Sell ex GST',
-  'Margin ex GST','Lost reason','Closed date','Month'
+  'Margin ex GST','Lost reason','Closed date','Month',
+  'Supplier cost','Payment method'
 ];
 
 const STATUSES = ['New','Quoted','Paid','Booked','Delivered','Closed','Declined','Lost'];
@@ -56,6 +57,7 @@ const CUSTOMER_TYPES = ['Trade','Repeat','One-off'];
 const LANES = ['Trailer single','Trailer double','Truck 10t (NCJ)','Truck 10t (other carrier)','Truck 20t+'];
 const UNITS = ['t','m3'];
 const LOST_REASONS = ['Price','No reply','Away on swing','No carrier','Other'];
+const PAYMENT_METHODS = ['Stripe','PayID','Cash','Other'];
 
 /** Serve the app. */
 function doGet() {
@@ -150,7 +152,10 @@ function getJobs() {
       sell: get('Sell ex GST'),
       margin: get('Margin ex GST'),
       lostReason: get('Lost reason'),
-      closedDate: fmtDay(get('Closed date'))
+      closedDate: fmtDay(get('Closed date')),
+      supplierCost: get('Supplier cost'),
+      payMethod: get('Payment method'),
+      paidDate: fmtDay(get('Paid date'))
     });
   }
   return out.reverse();
@@ -520,6 +525,7 @@ function setupPipelineValidation() {
   applyList('Lane', LANES);
   applyList('Unit', UNITS);
   applyList('Lost reason', LOST_REASONS);
+  applyList('Payment method', PAYMENT_METHODS);
 
   Logger.log('Pipeline dropdowns set up on Enquiries.');
   return 'OK';
@@ -656,6 +662,139 @@ function setupPipelineTab() {
   return 'OK';
 }
 
+/* ============ MONEY ============ */
+
+/** Australian financial year start (1 July) for a given date. */
+function fyStart_(d) {
+  const y = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1;
+  return new Date(y, 6, 1);
+}
+
+function asDate_(v) {
+  if (v instanceof Date && !isNaN(v.getTime())) return v;
+  if (!v) return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Money view: what actually landed, what's still owed, and what it cost.
+ *
+ * Everything here parses through the same parseAmount_() the invoice
+ * generator uses and resolves GST through the same gstAppliesOn() /
+ * resolveSupplyDate_() pair, so a figure on this tab and the figure on
+ * the matching invoice can't drift apart.
+ *
+ * monthKey is 'YYYY-MM'; omit it for the current month. The FY-to-date
+ * block always runs 1 July → today regardless of the month selected —
+ * "year to date" means today, not the end of whichever month you're
+ * looking at.
+ */
+function getMoneySummary(monthKey) {
+  const sh = sheet_();
+  const map = headerMap_(sh);
+  const last = sh.getLastRow();
+
+  const now = new Date();
+  if (!monthKey) monthKey = Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyy-MM');
+  const parts = String(monthKey).split('-');
+  const mStart = new Date(Number(parts[0]), Number(parts[1]) - 1, 1);
+  const mEnd = new Date(mStart.getFullYear(), mStart.getMonth() + 1, 1);
+  const fy = fyStart_(now);
+
+  const blank = function () {
+    return { paid: 0, gst: 0, supplierCost: 0, jobs: 0, byType: {}, byMethod: {} };
+  };
+  const month = blank(), fytd = blank();
+  const unpaid = [];
+  const months = {};
+
+  if (last >= 2) {
+    const rows = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      // Shim matching readJobRow_'s shape so the shared invoice helpers work
+      // off the in-memory row rather than a round trip per job.
+      const get = function (field) {
+        const idx = map[field];
+        if (idx === undefined) return '';
+        const v = r[idx];
+        return v === null || v === undefined ? '' : v;
+      };
+      const ctx = { get: get };
+
+      const amount = parseAmount_(get('Quoted $'));
+      const paidDate = asDate_(get('Paid date'));
+      const invoiceNo = String(get('Invoice No') || '').trim();
+      const name = String(get('Name') || '').trim();
+
+      if (invoiceNo && !paidDate) {
+        unpaid.push({
+          row: i + 2,
+          name: name || '(no name)',
+          invoiceNo: invoiceNo,
+          amount: amount,
+          amountText: money_(amount),
+          type: String(get('Type') || '').trim()
+        });
+      }
+
+      if (!paidDate) continue;
+
+      months[Utilities.formatDate(paidDate, Session.getScriptTimeZone(), 'yyyy-MM')] = true;
+
+      const gstOnThis = gstAppliesOn(resolveSupplyDate_(ctx).date)
+        ? Math.round((amount / 11) * 100) / 100 : 0;
+      const cost = parseAmount_(get('Supplier cost'));
+      const type = String(get('Type') || '').trim() || 'Unspecified';
+      const method = String(get('Payment method') || '').trim() || 'Unrecorded';
+
+      const add = function (b) {
+        b.paid += amount;
+        b.gst += gstOnThis;
+        b.supplierCost += cost;
+        b.jobs += 1;
+        b.byType[type] = (b.byType[type] || 0) + amount;
+        b.byMethod[method] = (b.byMethod[method] || 0) + amount;
+      };
+      if (paidDate >= mStart && paidDate < mEnd) add(month);
+      if (paidDate >= fy && paidDate <= now) add(fytd);
+    }
+  }
+
+  const finish = function (b) {
+    const exGst = b.paid - b.gst;
+    return {
+      paid: b.paid, paidText: money_(b.paid),
+      gst: b.gst, gstText: money_(b.gst),
+      supplierCost: b.supplierCost, supplierCostText: money_(b.supplierCost),
+      margin: exGst - b.supplierCost, marginText: money_(exGst - b.supplierCost),
+      exGst: exGst, exGstText: money_(exGst),
+      jobs: b.jobs,
+      byType: b.byType, byMethod: b.byMethod
+    };
+  };
+
+  unpaid.sort(function (a, b) { return b.amount - a.amount; });
+  const unpaidTotal = unpaid.reduce(function (s, u) { return s + u.amount; }, 0);
+
+  const monthList = Object.keys(months);
+  if (monthList.indexOf(monthKey) === -1) monthList.push(monthKey);
+  monthList.sort().reverse();
+
+  return {
+    monthKey: monthKey,
+    monthLabel: Utilities.formatDate(mStart, Session.getScriptTimeZone(), 'MMMM yyyy'),
+    fyLabel: 'FY to date (from ' + Utilities.formatDate(fy, Session.getScriptTimeZone(), 'd MMM yyyy') + ')',
+    months: monthList,
+    month: finish(month),
+    fytd: finish(fytd),
+    unpaid: unpaid,
+    unpaidTotal: unpaidTotal,
+    unpaidTotalText: money_(unpaidTotal)
+  };
+}
+
 /** Current month's headline numbers off the Pipeline tab, for the
  *  one-line summary on the Jobs screen. Null if the Pipeline tab hasn't
  *  been set up yet. */
@@ -704,7 +843,7 @@ header{background:var(--drk);border-bottom:3px solid var(--org);padding:12px 14p
 h1{font-size:1.1rem;letter-spacing:.05em;text-transform:uppercase}
 h1 span{color:var(--org)}
 .tabs{display:flex;background:var(--drk);border-bottom:1px solid var(--div);position:sticky;top:52px;z-index:9}
-.tab{flex:1;padding:13px 4px;text-align:center;font-weight:600;font-size:.9rem;color:var(--sof);border-bottom:3px solid transparent}
+.tab{flex:1 1 0;min-width:0;padding:13px 2px;text-align:center;font-weight:600;font-size:.82rem;color:var(--sof);border-bottom:3px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tab.on{color:var(--org);border-bottom-color:var(--org)}
 .wrap{padding:12px}
 .filters{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px}
@@ -756,6 +895,17 @@ textarea{min-height:64px}
 .qbind.on{display:flex}
 .pline{padding:0 0 10px;color:var(--sof);font-size:.88rem}
 .pline b{color:#fff}
+.mny-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.mny-cell{background:var(--drk);border:1px solid var(--div);border-radius:5px;padding:12px}
+.mny-cell.hero{border-left:4px solid var(--org)}
+.mny-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:#8d8d8d;margin-bottom:4px}
+.mny-big{font-size:1.5rem;font-weight:700;color:#fff;line-height:1.1}
+.mny-mid{font-size:1.05rem;font-weight:700;color:#fff}
+.mny-sub{font-size:.75rem;color:var(--sof);margin-top:3px}
+.mny-h{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--org);font-weight:700;margin:16px 0 7px}
+.mny-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--div);font-size:.88rem;color:var(--sof)}
+.mny-row b{color:#fff;font-weight:600;white-space:nowrap}
+.mny-neg{color:#e06b5a}
 </style></head><body>
 
 <header><h1>MRTH <span>Jobs</span></h1></header>
@@ -763,6 +913,7 @@ textarea{min-height:64px}
   <div class="tab on" data-t="jobs">Jobs</div>
   <div class="tab" data-t="new">+ Enquiry</div>
   <div class="tab" data-t="quote">Quote</div>
+  <div class="tab" data-t="money">Money</div>
   <div class="tab" data-t="settings">Settings</div>
 </div>
 
@@ -844,6 +995,11 @@ textarea{min-height:64px}
     </div>
   </div>
 
+  <div id="v-money" style="display:none">
+    <select id="mn-month" style="margin-bottom:12px"></select>
+    <div id="mn-body"><div class="spin">Loading…</div></div>
+  </div>
+
   <div id="v-settings" style="display:none">
     <label>GST start date</label>
     <input id="s-gst" type="date">
@@ -868,6 +1024,7 @@ var CUSTOMER_TYPES = ['Trade','Repeat','One-off'];
 var LANES = ['Trailer single','Trailer double','Truck 10t (NCJ)','Truck 10t (other carrier)','Truck 20t+'];
 var UNITS = ['t','m3'];
 var LOST_REASONS = ['Price','No reply','Away on swing','No carrier','Other'];
+var PAYMENT_METHODS = ['Stripe','PayID','Cash','Other'];
 
 function toast(t){var e=document.getElementById('toast');e.textContent=t;e.style.display='block';
   setTimeout(function(){e.style.display='none';},2200);}
@@ -908,10 +1065,11 @@ document.querySelectorAll('.tab').forEach(function(tb){
   tb.onclick=function(){
     document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
     tb.classList.add('on');
-    ['jobs','new','quote','settings'].forEach(function(v){
+    ['jobs','new','quote','money','settings'].forEach(function(v){
       document.getElementById('v-'+v).style.display = (v===tb.dataset.t)?'block':'none';
     });
     if(tb.dataset.t==='settings') loadSettings();
+    if(tb.dataset.t==='money') loadMoney();
   };
 });
 
@@ -966,6 +1124,8 @@ function drawList(){
       + (j.margin!==''?'<div class="kv">Margin ex GST: <b>$'+esc(j.margin)+'</b></div>':'')
       + (j.lostReason?'<div class="kv">Lost reason: <b>'+esc(j.lostReason)+'</b></div>':'')
       + (j.closedDate?'<div class="kv">Closed: <b>'+esc(j.closedDate)+'</b></div>':'')
+      + (j.supplierCost?'<div class="kv">Supplier cost: <b>$'+esc(j.supplierCost)+'</b></div>':'')
+      + (j.payMethod?'<div class="kv">Paid by: <b>'+esc(j.payMethod)+'</b></div>':'')
       + '<div class="acts">'
       + (tel?'<a class="btn" href="'+tel+'">Call</a>':'')
       + (sms?'<a class="btn" href="'+sms+'">Text</a>':'')
@@ -978,6 +1138,8 @@ function drawList(){
       + '<button class="btn gh" onclick="setCustType('+j.row+')">Cust.</button>'
       + '<button class="btn gh" onclick="setQtyUnit('+j.row+')">Qty</button>'
       + '<button class="btn gh" onclick="setLaneField('+j.row+')">Lane</button>'
+      + '<button class="btn gh" onclick="setSupplierCost('+j.row+')">Cost</button>'
+      + '<button class="btn gh" onclick="setPayMethod('+j.row+')">Paid by</button>'
       + '<button class="btn gh" onclick="quoteForJob('+j.row+')">Quote</button>'
       + '<button class="btn org" onclick="genInvoice('+j.row+')">Invoice</button>'
       + '<button class="btn gh" onclick="declineJob('+j.row+')">Declined</button>'
@@ -1029,6 +1191,14 @@ function finishClose(row,status,reason){
 function setSourceField(row){ openPicker('Source', SOURCES, function(v){ save(row,'Source',v,'Source saved'); }); }
 function setCustType(row){ openPicker('Customer type', CUSTOMER_TYPES, function(v){ save(row,'Customer type',v,'Customer type saved'); }); }
 function setLaneField(row){ openPicker('Lane', LANES, function(v){ save(row,'Lane',v,'Lane saved'); }); }
+function setSupplierCost(row){
+  var j=getJob(row);
+  var v=prompt('Supplier cost ex GST (what you paid NCJ/Cowara)', j?j.supplierCost:'');
+  if(v!==null) save(row,'Supplier cost',v,'Supplier cost saved');
+}
+function setPayMethod(row){
+  openPicker('Payment method', PAYMENT_METHODS, function(v){ save(row,'Payment method',v,'Payment method saved'); });
+}
 function setQtyUnit(row){
   var j=getJob(row);
   var q=prompt('Qty', j?j.pqty:''); if(q===null) return;
@@ -1092,6 +1262,77 @@ function genInvoice(row){
     }).withFailureHandler(function(e){toast('Failed: '+e.message);}).confirmGenerateInvoice(row);
   }).withFailureHandler(function(e){toast('Failed: '+e.message);}).previewInvoice(row);
 }
+
+/* ---------- MONEY ---------- */
+var MONEY_MONTH = null;
+function loadMoney(){
+  document.getElementById('mn-body').innerHTML='<div class="spin">Loading…</div>';
+  google.script.run.withSuccessHandler(drawMoney)
+    .withFailureHandler(function(e){
+      document.getElementById('mn-body').innerHTML='<div class="empty">Could not load: '+e.message+'</div>';
+    }).getMoneySummary(MONEY_MONTH);
+}
+
+function monthName(key){
+  var p=String(key).split('-');
+  var names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return names[Number(p[1])-1]+' '+p[0];
+}
+
+function splitRows(obj){
+  var keys=Object.keys(obj||{});
+  if(!keys.length) return '<div class="mny-row">Nothing yet</div>';
+  keys.sort(function(a,b){return obj[b]-obj[a];});
+  return keys.map(function(k){
+    return '<div class="mny-row"><span>'+esc(k)+'</span><b>$'+Math.round(obj[k]).toLocaleString()+'</b></div>';
+  }).join('');
+}
+
+function drawMoney(d){
+  MONEY_MONTH=d.monthKey;
+  var sel=document.getElementById('mn-month');
+  sel.innerHTML=d.months.map(function(m){
+    return '<option value="'+m+'"'+(m===d.monthKey?' selected':'')+'>'+monthName(m)+'</option>';
+  }).join('');
+
+  var m=d.month, f=d.fytd;
+  var marginCls=m.margin<0?' mny-neg':'';
+  var h='<div class="mny-grid">'
+    + '<div class="mny-cell hero"><div class="mny-lbl">Paid — '+esc(d.monthLabel)+'</div>'
+    + '<div class="mny-big">'+m.paidText+'</div><div class="mny-sub">'+m.jobs+' job'+(m.jobs===1?'':'s')+'</div></div>'
+    + '<div class="mny-cell hero"><div class="mny-lbl">Margin</div>'
+    + '<div class="mny-big'+marginCls+'">'+m.marginText+'</div><div class="mny-sub">paid ex GST − supplier cost</div></div>'
+    + '</div>'
+    + '<div class="mny-grid">'
+    + '<div class="mny-cell"><div class="mny-lbl">GST collected</div><div class="mny-mid">'+m.gstText+'</div></div>'
+    + '<div class="mny-cell"><div class="mny-lbl">Supplier cost</div><div class="mny-mid">'+m.supplierCostText+'</div></div>'
+    + '</div>';
+
+  h+='<div class="mny-h">'+esc(d.fyLabel)+'</div>'
+    + '<div class="mny-row"><span>Paid</span><b>'+f.paidText+'</b></div>'
+    + '<div class="mny-row"><span>GST collected</span><b>'+f.gstText+'</b></div>'
+    + '<div class="mny-row"><span>Supplier cost</span><b>'+f.supplierCostText+'</b></div>'
+    + '<div class="mny-row"><span>Margin</span><b'+(f.margin<0?' class="mny-neg"':'')+'>'+f.marginText+'</b></div>';
+
+  h+='<div class="mny-h">Invoiced — unpaid · '+d.unpaidTotalText+'</div>';
+  if(!d.unpaid.length){
+    h+='<div class="mny-row">Nothing outstanding</div>';
+  } else {
+    h+=d.unpaid.map(function(u){
+      return '<div class="mny-row"><span>'+esc(u.name)+'<br><span style="color:#8d8d8d;font-size:.78rem">'
+        +esc(u.invoiceNo)+(u.type?' · '+esc(u.type):'')+'</span></span><b>'+u.amountText+'</b></div>';
+    }).join('');
+  }
+
+  h+='<div class="mny-h">'+esc(d.monthLabel)+' by type</div>'+splitRows(m.byType);
+  h+='<div class="mny-h">'+esc(d.monthLabel)+' by payment method</div>'+splitRows(m.byMethod);
+
+  document.getElementById('mn-body').innerHTML=h;
+}
+
+document.getElementById('mn-month').addEventListener('change',function(){
+  MONEY_MONTH=this.value; loadMoney();
+});
 
 /* ---------- SETTINGS ---------- */
 function loadSettings(){
