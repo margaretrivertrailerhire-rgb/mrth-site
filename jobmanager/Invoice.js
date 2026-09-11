@@ -34,6 +34,12 @@ const INVOICE_CONFIG = {
 
   REVIEW_LINK: 'https://g.page/r/CaYV_-uiUviZEBI/review',
 
+  // Hosted rather than inlined: mail clients routinely strip data-URI
+  // images, so an emailed logo has to come from a public URL. The PDF
+  // keeps its embedded copy (see Logo.js) because the HTML-to-PDF
+  // converter can't be relied on to fetch anything at render time.
+  LOGO_URL: 'https://www.margaretrivertrailerhire.com.au/assets/mrth-logo-light-horizontal.png',
+
   DARK: '#1A1A1A',
   ORANGE: '#E8651A',
   GREY: '#6B6B6B',
@@ -566,7 +572,33 @@ function createInvoiceEmailDraft(row) {
     INVOICE_CONFIG.REVIEW_LINK + '\n\n' +
     'Cheers,\n' + INVOICE_CONFIG.TRADING_SHORT + '\n' + INVOICE_CONFIG.WEBSITE;
 
-  const opts = { attachments: [pdf], name: INVOICE_CONFIG.TRADING_SHORT };
+  // Plain `body` above stays as the text fallback for clients that don't
+  // render HTML; htmlBody is what most people will actually see.
+  const htmlBody =
+    '<div style="font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;color:#1A1A1A">' +
+      (INVOICE_CONFIG.LOGO_URL
+        ? '<img src="' + INVOICE_CONFIG.LOGO_URL + '" width="200" alt="' +
+          escapeHtml_(INVOICE_CONFIG.BUSINESS_NAME) +
+          '" style="width:200px;max-width:100%;height:auto;display:block;margin:0 0 20px">'
+        : '') +
+      '<p>Hi ' + escapeHtml_(first) + ',</p>' +
+      '<p>Your ' + escapeHtml_(model.title.toLowerCase()) + ' for ' + money_(model.total) + ' is attached.</p>' +
+      '<p>' + escapeHtml_(INVOICE_CONFIG.PAYMENT_TERMS) + '<br>' +
+      (model.stripeLink
+        ? 'Pay by card or Apple Pay: <a href="' + model.stripeLink + '">' + escapeHtml_(model.stripeLink) + '</a><br>'
+        : '') +
+      (INVOICE_CONFIG.PAYID
+        ? 'Or PayID: ' + escapeHtml_(INVOICE_CONFIG.PAYID) + ' — reference ' + escapeHtml_(model.invoiceNumber)
+        : '') +
+      '</p>' +
+      '<p>Thanks again for the job. If you were happy with the delivery, a quick Google review ' +
+      'makes a real difference to a small local business:<br>' +
+      '<a href="' + INVOICE_CONFIG.REVIEW_LINK + '">' + escapeHtml_(INVOICE_CONFIG.REVIEW_LINK) + '</a></p>' +
+      '<p>Cheers,<br>' + escapeHtml_(INVOICE_CONFIG.TRADING_SHORT) + '<br>' +
+      '<a href="https://' + INVOICE_CONFIG.WEBSITE + '">' + escapeHtml_(INVOICE_CONFIG.WEBSITE) + '</a></p>' +
+    '</div>';
+
+  const opts = { attachments: [pdf], name: INVOICE_CONFIG.TRADING_SHORT, htmlBody: htmlBody };
   if (INVOICE_CONFIG.EMAIL_MODE === 'send') {
     GmailApp.sendEmail(model.customerEmail, subject, body, opts);
   } else {
