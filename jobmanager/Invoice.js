@@ -631,47 +631,11 @@ function createInvoiceEmailDraft(row) {
 }
 
 /**
- * Makes an already-generated invoice PDF shareable and hands back the link.
- *
- * Drive files are created private, so the Invoice Link stored on the row
- * only opens for the account that made it — send that to a customer and
- * they get a "request access" screen instead of their invoice. This flips
- * the file to view-by-link at the moment of sharing rather than exposing
- * every invoice at generation time, so only the ones actually sent out
- * become readable by anyone holding the URL.
- */
-function getInvoiceShareLink(row) {
-  const ctx = readJobRow_(row);
-  const invoiceNumber = String(ctx.get('Invoice No') || '').trim();
-  const link = String(ctx.get('Invoice Link') || '').trim();
-  if (!invoiceNumber || !link) throw new Error('No invoice has been generated for this job yet.');
-
-  const fileId = extractDriveFileId_(link);
-  const file = DriveApp.getFileById(fileId);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-  // file.getUrl() is Drive's /view page — on a phone that deep-links into
-  // the Drive app and asks for a sign-in, which is no use to a customer
-  // (or to anyone with a screen lock on Drive). The uc?export=download
-  // endpoint hands back the PDF bytes instead, so it opens in whatever
-  // PDF viewer the recipient already has, no Google account involved.
-  const downloadUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
-
-  const title = gstAppliesOn(resolveSupplyDate_(ctx).date) ? 'Tax Invoice' : 'Invoice';
-  return {
-    url: downloadUrl,
-    viewUrl: file.getUrl(),
-    title: title,
-    invoiceNumber: invoiceNumber,
-    shareText: title + ' ' + invoiceNumber + ' from ' + INVOICE_CONFIG.TRADING_SHORT + '\n' + downloadUrl
-  };
-}
-
-/**
- * Puts a shared invoice PDF back to private — the counterpart to
- * getInvoiceShareLink. Anyone still holding the old link gets an
- * access screen from then on. Safe to run on a file that was never
- * shared in the first place.
+ * Puts an invoice PDF back to private. Nothing in the app makes invoices
+ * public any more — they go out as email attachments instead, since the
+ * PDF carries the registered home address — but invoices shared before
+ * that change are still view-by-link, so this stays available to lock
+ * them back down. Safe to run on a file that was never shared.
  */
 function revokeInvoiceShare(row) {
   const ctx = readJobRow_(row);

@@ -1165,7 +1165,7 @@ function drawList(){
       + '<button class="btn gh" onclick="setPayMethod('+j.row+')">Paid by</button>'
       + '<button class="btn gh" onclick="quoteForJob('+j.row+')">Quote</button>'
       + '<button class="btn org" onclick="genInvoice('+j.row+')">Invoice</button>'
-      + (j.invoiceNo?'<button class="btn gh" onclick="shareInvoice('+j.row+')">Share PDF</button>':'')
+      + (j.invoiceNo?'<button class="btn gh" onclick="emailInvoicePdf('+j.row+')">Email PDF</button>':'')
       + (j.invoiceNo?'<button class="btn gh" onclick="unshareInvoice('+j.row+')">Unshare</button>':'')
       + '<button class="btn gh" onclick="declineJob('+j.row+')">Declined</button>'
       + '<button class="btn gh" onclick="loseJob('+j.row+')">Lost</button>'
@@ -1258,31 +1258,18 @@ function setJobDate(row){
 }
 
 /* ---------- INVOICE ---------- */
-function copyText(t,okMsg){
-  var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
-  ta.select();
-  try{document.execCommand('copy');toast(okMsg||'Copied');}catch(e){toast('Copy failed');}
-  document.body.removeChild(ta);
-}
 
-// The app runs inside Apps Script's sandboxed iframe, which doesn't carry
-// the web-share permission policy, so navigator.share is usually
-// unavailable or rejects here — the clipboard path is the one that
-// actually runs most of the time, not a rare fallback.
-function shareInvoice(row){
-  toast('Preparing link…');
-  google.script.run.withSuccessHandler(function(s){
-    if(navigator.share){
-      navigator.share({title:s.title+' '+s.invoiceNumber,text:s.shareText,url:s.url})
-        .then(function(){toast('Shared');})
-        .catch(function(err){
-          if(err && err.name==='AbortError') return; // user closed the share sheet
-          copyText(s.shareText,'Link copied — paste it into a text');
-        });
-    } else {
-      copyText(s.shareText,'Link copied — paste it into a text');
-    }
-  }).withFailureHandler(function(e){toast('Failed: '+e.message);}).getInvoiceShareLink(row);
+// Invoices go out as an email attachment rather than a Drive link. The
+// link route meant flipping the PDF to view-by-link, and invoices carry
+// the registered home address — an attachment keeps it off any public URL.
+function emailInvoicePdf(row){
+  var j=getJob(row);
+  if(j && !j.email){ toast('No email on this job — add one, then try again'); return; }
+  toast('Creating draft…');
+  google.script.run.withSuccessHandler(function(){
+    toast('Draft saved in Gmail — review it, then send');
+  }).withFailureHandler(function(e){toast('Failed: '+e.message);})
+   .createInvoiceEmailDraft(row);
 }
 
 function unshareInvoice(row){
