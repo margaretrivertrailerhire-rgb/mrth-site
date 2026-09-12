@@ -32,7 +32,7 @@ const INVOICE_CONFIG = {
   // before it leaves.
   EMAIL_MODE: 'draft',
 
-  REVIEW_LINK: 'https://g.page/r/CaYV_-uiUviZEBI/review',
+  REVIEW_LINK: 'https://g.page/r/CaYV_-uiUviZEAI/review',
 
   // Hosted rather than inlined: mail clients routinely strip data-URI
   // images, so an emailed logo has to come from a public URL. The PDF
