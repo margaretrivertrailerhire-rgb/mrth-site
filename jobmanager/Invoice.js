@@ -16,6 +16,17 @@ const INVOICE_CONFIG = {
   BUSINESS_NAME: 'MR Trailer Hire & Landscape Delivery', // exact ASIC-registered name (8 Sept 2026)
   TRADING_SHORT: 'MR Trailer Hire',
   ABN: '60 322 641 541',
+
+  // REGISTERED ADDRESS — PRIVATE. This is Neil's home address. It appears
+  // on invoices because the registered address belongs there, and nowhere
+  // else. Do NOT copy it to the website, JSON-LD/schema, page footers,
+  // quote messages, the invoice email body, or any other surface a
+  // customer sees before they've booked. The public-facing address is the
+  // trailer collection point, 617 Bramley River Road — that's the one in
+  // the site's structured data and the one matching the Google Business
+  // Profile pin.
+  REGISTERED_ADDRESS: '1985 Jindong Treeton Road, Osmington WA 6285',
+
   PHONE: '0429 016 758',
   EMAIL: 'margaretrivertrailerhire@gmail.com',
   WEBSITE: 'margaretrivertrailerhire.com.au',
@@ -457,6 +468,7 @@ function renderInvoiceHtml_(m) {
       '<td class="ident">' +
         '<div class="nm">' + escapeHtml_(INVOICE_CONFIG.BUSINESS_NAME) + '</div>' +
         '<div>ABN ' + escapeHtml_(INVOICE_CONFIG.ABN) + '</div>' +
+        '<div>' + escapeHtml_(INVOICE_CONFIG.REGISTERED_ADDRESS) + '</div>' +
         '<div>' + escapeHtml_(INVOICE_CONFIG.PHONE) + '</div>' +
         '<div>' + escapeHtml_(INVOICE_CONFIG.EMAIL) + '</div>' +
         '<div>' + escapeHtml_(INVOICE_CONFIG.WEBSITE) + '</div>' +
