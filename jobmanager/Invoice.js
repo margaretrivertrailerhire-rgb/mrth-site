@@ -288,6 +288,17 @@ function buildInvoiceModel_(ctx, invoiceNumberFormatted) {
   // Only fold the free-text quantity back into the description when it
   // couldn't be split into its own Qty/Unit columns, so it isn't printed twice.
   if (!measure.qty && qtyText) description += ' — ' + qtyText;
+
+  // Multi-load truck jobs get their build-up spelled out, so the customer
+  // can see the total is loads x a per-load rate. The rate shown is the
+  // one that actually reconciles (total / loads) — on a discounted job
+  // that's below the rate card, and printing the card rate here would
+  // leave the arithmetic on the invoice not adding up.
+  const loads = parseFloat(ctx.get('Loads')) || 0;
+  if (loads > 1 && measure.qty && total > 0) {
+    description += '\n' + measure.qty + ' tonnes — ' + loads + ' × 10 t truck loads at ' +
+      money_(Math.round((total / loads) * 100) / 100) + ' per load';
+  }
   // The address isn't repeated here — it already prints in the "Billed to"
   // block, and both read from the same field, so a "Delivered to" line
   // would print the same string twice on a one-page invoice.

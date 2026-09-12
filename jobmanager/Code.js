@@ -48,7 +48,7 @@ const REQUIRED_COLS = [
   'Scheduled date','Start Date','End Date','Calendar Event ID',
   'Source','Customer type','Lane','Qty','Unit','Cost ex GST','Sell ex GST',
   'Margin ex GST','Lost reason','Closed date','Month',
-  'Supplier cost','Payment method'
+  'Supplier cost','Payment method','Loads','Calculated $'
 ];
 
 const STATUSES = ['New','Quoted','Paid','Booked','Delivered','Closed','Declined','Lost'];
@@ -155,7 +155,9 @@ function getJobs() {
       closedDate: fmtDay(get('Closed date')),
       supplierCost: get('Supplier cost'),
       payMethod: get('Payment method'),
-      paidDate: fmtDay(get('Paid date'))
+      paidDate: fmtDay(get('Paid date')),
+      loads: get('Loads'),
+      calcTotal: get('Calculated $')
     });
   }
   return out.reverse();
@@ -484,6 +486,11 @@ function saveQuoteToJob(row, payload) {
   set('Qty', payload.qty);
   set('Unit', payload.unit);
   if (payload.lane) set('Lane', payload.lane);
+  // Loads drives the "5 x 10 t truck loads" breakdown on the card and the
+  // invoice. Calculated $ is kept alongside Quoted $ so a manually
+  // discounted job still shows what the rate card said it should be.
+  if (payload.loads) set('Loads', payload.loads);
+  if (payload.calcTotal) set('Calculated $', payload.calcTotal);
 
   const cost = lookupCost_(payload.product, payload.lane);
   const costFound = cost !== null;
@@ -979,6 +986,14 @@ textarea{min-height:64px}
     <div id="q-truck-mode" style="display:none">
       <label>Material</label><select id="qt-mat"></select>
       <label>Zone</label><select id="qt-zone"></select>
+      <div class="row2">
+        <div><label>Loads (10 t each)</label>
+          <select id="qt-loads"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select>
+        </div>
+        <div><label>Custom total ($)</label>
+          <input id="qt-custom" type="number" inputmode="decimal" placeholder="optional">
+        </div>
+      </div>
       <div class="out" id="qt-out"></div>
       <div class="acts" style="margin-top:12px">
         <button class="btn org" id="qt-copy">Copy quote message</button>
@@ -1118,7 +1133,15 @@ function drawList(){
       + (j.source?'<div class="kv">Source: <b>'+esc(j.source)+'</b></div>':'')
       + (j.custType?'<div class="kv">Customer: <b>'+esc(j.custType)+'</b></div>':'')
       + (j.lane?'<div class="kv">Lane: <b>'+esc(j.lane)+'</b></div>':'')
-      + (j.pqty?'<div class="kv">Qty: <b>'+esc(j.pqty)+' '+esc(j.unit)+'</b></div>':'')
+      + (j.pqty?'<div class="kv">Qty: <b>'+esc(j.pqty)+' '+esc(j.unit)+'</b>'
+          +(j.loads?' — '+esc(j.loads)+' × 10 t truck load'+(+j.loads===1?'':'s'):'')+'</div>':'')
+      + (function(){
+          var calc=parseFloat(j.calcTotal), charged=parseFloat(j.quoted);
+          if(!calc||!charged||Math.abs(calc-charged)<0.005) return '';
+          var d=calc-charged;
+          return '<div class="kv">Rate card: <b>$'+calc.toLocaleString()+'</b> — '
+            +(d>0?'$'+d.toLocaleString()+' discount':'$'+Math.abs(d).toLocaleString()+' above')+'</div>';
+        })()
       + (j.cost!==''?'<div class="kv">Cost ex GST: <b>$'+esc(j.cost)+'</b></div>':(j.pqty?'<div class="kv warn">⚠ No cost set — add one on the Pricing tab</div>':''))
       + (j.sell!==''?'<div class="kv">Sell ex GST: <b>$'+esc(j.sell)+'</b></div>':'')
       + (j.margin!==''?'<div class="kv">Margin ex GST: <b>$'+esc(j.margin)+'</b></div>':'')
@@ -1588,16 +1611,34 @@ function truckQuote(){
     return;
   }
   var price=row[zoneIdx+1];
-  out.innerHTML='<div class="big">$'+price+'</div>'
-    + '<div class="ln">10 t '+matName+' — '+zoneName+'</div>'
-    + '<div class="ln">All-in: material + delivery, no extras.</div>';
+  var loads=+document.getElementById('qt-loads').value||1;
+  var tonnes=loads*10;
+  var calc=price*loads;
+  var custom=+document.getElementById('qt-custom').value;
+  var charged=custom>0?custom:calc;
+  var diff=calc-charged;
+
+  var loadLine=tonnes+' tonnes — '+loads+' × 10 t truck load'+(loads===1?'':'s');
+  out.innerHTML='<div class="big">$'+charged.toLocaleString()+'</div>'
+    + '<div class="ln">'+esc(matName)+' — '+esc(zoneName)+'</div>'
+    + '<div class="ln">'+loadLine+' at $'+price.toLocaleString()+' per load</div>'
+    + (custom>0
+        ? '<div class="ln">Rate card: $'+calc.toLocaleString()+(diff>0?' — $'+diff.toLocaleString()+' discount':(diff<0?' — $'+Math.abs(diff).toLocaleString()+' above':''))+'</div>'
+        : '<div class="ln">All-in: material + delivery, no extras.</div>');
   out.classList.add('on');
-  out.dataset.msg='A full truck load — 10 t of '+matName+' delivered, all up $'+price+'. '
-    + 'One drop, no fuel levy, no extras.\\n\\nTo lock it in, payment first please: https://buy.stripe.com/6oUbIUdbo9APbiobRW7AI0B\\n'
-    + 'Just enter $'+price+' when it asks for the amount 👍\\n\\nOnce that\\'s through I\\'ll confirm your delivery window.';
+
+  var lead=loads===1
+    ? 'A full truck load — 10 t of '+matName+' delivered, all up $'+charged.toLocaleString()+'. '
+    : loads+' truck loads — '+tonnes+' t of '+matName+' delivered, all up $'+charged.toLocaleString()
+      +' ($'+price.toLocaleString()+' per 10 t load). ';
+  out.dataset.msg=lead
+    + 'One drop per load, no fuel levy, no extras.\\n\\nTo lock it in, payment first please: https://buy.stripe.com/6oUbIUdbo9APbiobRW7AI0B\\n'
+    + 'Just enter $'+charged.toLocaleString()+' when it asks for the amount 👍\\n\\nOnce that\\'s through I\\'ll confirm your delivery window.';
 }
-document.getElementById('qt-mat').addEventListener('change', truckQuote);
-document.getElementById('qt-zone').addEventListener('change', truckQuote);
+['qt-mat','qt-zone','qt-loads','qt-custom'].forEach(function(id){
+  document.getElementById(id).addEventListener('change', truckQuote);
+  document.getElementById(id).addEventListener('input', truckQuote);
+});
 document.getElementById('qt-copy').onclick=function(){
   var m=document.getElementById('qt-out').dataset.msg;
   if(!m){toast('Pick a standard zone first');return;}
@@ -1614,11 +1655,16 @@ function saveTruckQuoteToJob(){
   var row=TRUCK.materials.filter(function(m){return m[0]===matName;})[0];
   if(!row||zoneIdx===-1){ toast('Pick a standard zone first'); return; }
   var price=row[zoneIdx+1];
+  var loads=+document.getElementById('qt-loads').value||1;
+  var calc=price*loads;
+  var custom=+document.getElementById('qt-custom').value;
+  var charged=custom>0?custom:calc;
   google.script.run.withSuccessHandler(function(r){
     toast(r.costFound?'Saved to job':'Saved — no cost set for this product yet');
     load(); loadPipelineLine();
   }).withFailureHandler(function(e){toast('Failed: '+e.message);})
-   .saveQuoteToJob(QUOTE_ROW,{product:matName,qty:10,unit:'t',lane:'Truck 10t (NCJ)',total:price});
+   .saveQuoteToJob(QUOTE_ROW,{product:matName,qty:loads*10,unit:'t',lane:'Truck 10t (NCJ)',
+     total:charged,loads:loads,calcTotal:calc});
 }
 
 load(); buildMats(); buildTruckMats(); loadPipelineLine();
