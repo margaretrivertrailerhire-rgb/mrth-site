@@ -1,0 +1,106 @@
+/* Shared styling for the material delivery pages.
+   Mirrors the homepage's inline styles — index.html deliberately keeps its
+   own copy inline so its first paint stays render-blocking-free, and so a
+   change here can never break the page that earns the traffic. */
+
+:root{
+  --bg:#1A1A1A;
+  --orange:#E8651A;
+  --grey-mid:#2E2E2E;
+  --grey-dark:#262626;
+  --divider:#3A3A3A;
+  --soft:#CCCCCC;
+  --gravel:#9a9a9a;
+  --white:#FFFFFF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{font-family:'Barlow',system-ui,sans-serif;color:var(--white);background:var(--bg);line-height:1.55;font-size:17px}
+.wrap{max-width:960px;margin:0 auto;padding:0 20px}
+a{color:var(--orange)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+/* header */
+header{background:var(--bg)}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 0;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--divider)}
+.brand{display:inline-block;line-height:0;text-decoration:none}
+.brand img{height:60px;width:auto;display:block}
+@media(max-width:520px){.brand img{height:44px}}
+nav a{color:var(--white);text-decoration:none;margin-left:18px;font-weight:500;font-size:.95rem}
+nav a:hover{color:var(--orange)}
+
+/* hero */
+.hero{background:var(--bg);color:var(--white);padding:38px 0 48px;border-bottom:6px solid var(--orange)}
+.hero h1{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(2rem,5.4vw,3.2rem);line-height:1.05;max-width:20ch}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero p{margin-top:14px;max-width:56ch;font-size:1.1rem;color:var(--soft)}
+.hero .cta-row{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap}
+.btn{display:inline-block;font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:1.05rem;padding:13px 26px;border-radius:4px;text-decoration:none;border:2px solid transparent;cursor:pointer}
+.btn-amber{background:var(--orange);color:#1A1A1A}
+.btn-amber:hover{background:#ff7526}
+.btn-ghost{border-color:var(--white);color:var(--white)}
+.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* breadcrumb */
+.crumbs{padding:14px 0 0;font-size:.88rem;color:var(--gravel)}
+.crumbs a{color:var(--gravel);text-decoration:none}
+.crumbs a:hover{color:var(--orange)}
+
+/* sections */
+section{padding:48px 0}
+.eyebrow{font-family:'Barlow Condensed';font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);font-size:.95rem}
+h2{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;font-size:clamp(1.6rem,4vw,2.2rem);margin:4px 0 18px;color:var(--white)}
+h3{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:1.25rem;color:var(--white);margin:26px 0 8px}
+
+/* body copy */
+.prose{max-width:64ch;color:var(--soft)}
+.prose p{margin-bottom:14px}
+.prose strong{color:var(--white)}
+.prose ul{margin:0 0 16px 20px;color:var(--soft)}
+.prose li{margin-bottom:7px}
+
+/* fact cards — coverage, depth, capacity */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin:22px 0 6px}
+.fact{border:1px solid var(--divider);border-top:4px solid var(--orange);background:var(--grey-dark);padding:18px;border-radius:4px;color:var(--soft);font-size:.95rem}
+.fact b{font-family:'Barlow Condensed';text-transform:uppercase;font-size:1.1rem;letter-spacing:.03em;display:block;margin-bottom:6px;color:var(--white)}
+.fact .big{font-size:1.7rem;font-weight:700;color:var(--orange);line-height:1.1;display:block;margin-bottom:4px;font-family:'Barlow Condensed'}
+
+/* price board */
+.board{background:var(--grey-dark);color:var(--soft);border-radius:6px;padding:30px 26px;border:1px solid var(--divider);border-top:6px solid var(--orange)}
+.board h2{color:var(--white);margin-bottom:4px}
+.board .note{color:var(--gravel);font-size:.92rem;margin-bottom:20px}
+.board h3{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.08em;color:var(--orange);font-size:1.1rem;margin:22px 0 8px;border-bottom:1px solid var(--divider);padding-bottom:4px}
+.board h3:first-of-type{margin-top:0}
+.board ul{list-style:none;margin:0}
+.board li{display:flex;align-items:baseline;gap:8px;padding:3.5px 0;font-size:.98rem}
+.board li .m{white-space:nowrap;color:var(--soft)}
+.board li .dots{flex:1;border-bottom:2px dotted var(--divider);transform:translateY(-4px)}
+.board li .p{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--white)}
+.board-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));column-gap:40px}
+
+/* gallery */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.gtile{background:var(--grey-dark);border:1px solid var(--divider);border-radius:5px;overflow:hidden}
+.gtile img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--grey-mid)}
+.gtile .cap{padding:9px 10px}
+.gtile .nm{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.03em;font-weight:700;font-size:1rem;color:var(--white);line-height:1.15}
+.gtile .pr{font-size:.85rem;color:var(--orange);font-weight:600;margin-top:2px}
+
+/* tables */
+.zones table{width:100%;border-collapse:collapse;background:var(--grey-dark);border:1px solid var(--divider)}
+.zones th,.zones td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--divider)}
+.zones th{font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.06em;background:var(--orange);color:#1A1A1A;font-weight:700}
+.zones tr:nth-child(even) td{background:var(--grey-mid)}
+.zones td{color:var(--soft)}
+.zones td:last-child{font-weight:600;white-space:nowrap;color:var(--white)}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -1px}
+.zones table{min-width:460px}
+
+/* closing call to action */
+.cta-band{background:var(--grey-dark);border:1px solid var(--divider);border-top:6px solid var(--orange);border-radius:6px;padding:28px 26px}
+.cta-band h2{margin-top:0}
+.cta-band p{color:var(--soft);max-width:56ch;margin-bottom:18px}
+
+footer{background:#141414;color:var(--gravel);padding:26px 0;font-size:.9rem;border-top:1px solid var(--divider)}
+footer a{color:var(--soft)}
