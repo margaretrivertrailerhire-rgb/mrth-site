@@ -185,42 +185,90 @@
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "LocalBusiness",
+      "@type": "LandscapingStore",
       "@id": "https://www.margaretrivertrailerhire.com.au/#business",
       "name": "MR Trailer Hire & Landscape Delivery",
-      "url": "https://www.margaretrivertrailerhire.com.au/",
+      "url": "https://www.margaretrivertrailerhire.com.au",
       "telephone": "+61429016758",
       "image": "https://www.margaretrivertrailerhire.com.au/assets/mrth-logo-light-horizontal.png",
       "logo": "https://www.margaretrivertrailerhire.com.au/assets/mrth-logo-light-horizontal.png",
-      "priceRange": "$$",
+      "priceRange": "$",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Osmington",
         "addressRegion": "WA",
         "postalCode": "6285",
-        "addressCountry": "AU"
+        "addressCountry": "AU",
+        "streetAddress": "617 Bramley River Road"
       },
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
         "opens": "06:00",
         "closes": "18:00"
       },
       "areaServed": [
-        {"@type":"City","name":"Margaret River"},
-        {"@type":"City","name":"Cowaramup"},
-        {"@type":"City","name":"Witchcliffe"},
-        {"@type":"City","name":"Gracetown"},
-        {"@type":"City","name":"Prevelly"},
-        {"@type":"City","name":"Gnarabup"},
-        {"@type":"City","name":"Wilyabrup"},
-        {"@type":"City","name":"Forest Grove"},
-        {"@type":"City","name":"Karridale"},
-        {"@type":"City","name":"Augusta"},
-        {"@type":"City","name":"Rosa Brook"},
-        {"@type":"City","name":"Osmington"}
+        {
+          "@type": "City",
+          "name": "Margaret River"
+        },
+        {
+          "@type": "City",
+          "name": "Osmington"
+        },
+        {
+          "@type": "City",
+          "name": "Cowaramup"
+        },
+        {
+          "@type": "City",
+          "name": "Witchcliffe"
+        },
+        {
+          "@type": "City",
+          "name": "Gracetown"
+        },
+        {
+          "@type": "City",
+          "name": "Prevelly"
+        },
+        {
+          "@type": "City",
+          "name": "Gnarabup"
+        },
+        {
+          "@type": "City",
+          "name": "Wilyabrup"
+        },
+        {
+          "@type": "City",
+          "name": "Forest Grove"
+        },
+        {
+          "@type": "City",
+          "name": "Karridale"
+        },
+        {
+          "@type": "City",
+          "name": "Augusta"
+        },
+        {
+          "@type": "City",
+          "name": "Rosa Brook"
+        }
       ],
-      "sameAs": ["https://www.facebook.com/margaretrivertrailerhire"]
+      "sameAs": [
+        "https://www.facebook.com/margaretrivertrailerhire",
+        "https://g.page/r/CaYV_-uiUviZEBI"
+      ]
     },
     {
       "@type": "Service",
@@ -228,7 +276,9 @@
       "serviceType": "Mulch delivery",
       "description": "Garden mulch delivered and tipped across the Margaret River region — marri chips, pine bark, bushland, coloured and shredded mulches, by the trailer load, double load or full truck load.",
       "url": "https://www.margaretrivertrailerhire.com.au/mulch-delivery.html",
-      "provider": {"@id": "https://www.margaretrivertrailerhire.com.au/#business"},
+      "provider": {
+        "@id": "https://www.margaretrivertrailerhire.com.au/#business"
+      },
       "areaServed": {
         "@type": "GeoShape",
         "description": "Cowaramup to Augusta, South West Western Australia"
@@ -237,15 +287,95 @@
         "@type": "OfferCatalog",
         "name": "Mulch",
         "itemListElement": [
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Marri Chips"},"price":"150","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Pine Bark"},"price":"150","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Bushland"},"price":"130","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Woodland Brown / Black"},"price":"130","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Karri & Peat"},"price":"130","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Derby Brown"},"price":"130","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Plantation"},"price":"110","priceCurrency":"AUD","unitText":"per cubic metre"}
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Marri Chips"
+            },
+            "price": "150",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Pine Bark"
+            },
+            "price": "150",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Bushland"
+            },
+            "price": "130",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Woodland Brown / Black"
+            },
+            "price": "130",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Karri & Peat"
+            },
+            "price": "130",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Derby Brown"
+            },
+            "price": "130",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Plantation"
+            },
+            "price": "110",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          }
         ]
       }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://www.margaretrivertrailerhire.com.au/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Mulch delivery",
+          "item": "https://www.margaretrivertrailerhire.com.au/mulch-delivery.html"
+        }
+      ]
     }
   ]
 }

@@ -209,42 +209,90 @@
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "LocalBusiness",
+      "@type": "LandscapingStore",
       "@id": "https://www.margaretrivertrailerhire.com.au/#business",
       "name": "MR Trailer Hire & Landscape Delivery",
-      "url": "https://www.margaretrivertrailerhire.com.au/",
+      "url": "https://www.margaretrivertrailerhire.com.au",
       "telephone": "+61429016758",
       "image": "https://www.margaretrivertrailerhire.com.au/assets/mrth-logo-light-horizontal.png",
       "logo": "https://www.margaretrivertrailerhire.com.au/assets/mrth-logo-light-horizontal.png",
-      "priceRange": "$$",
+      "priceRange": "$",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Osmington",
         "addressRegion": "WA",
         "postalCode": "6285",
-        "addressCountry": "AU"
+        "addressCountry": "AU",
+        "streetAddress": "617 Bramley River Road"
       },
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
         "opens": "06:00",
         "closes": "18:00"
       },
       "areaServed": [
-        {"@type":"City","name":"Margaret River"},
-        {"@type":"City","name":"Cowaramup"},
-        {"@type":"City","name":"Witchcliffe"},
-        {"@type":"City","name":"Gracetown"},
-        {"@type":"City","name":"Prevelly"},
-        {"@type":"City","name":"Gnarabup"},
-        {"@type":"City","name":"Wilyabrup"},
-        {"@type":"City","name":"Forest Grove"},
-        {"@type":"City","name":"Karridale"},
-        {"@type":"City","name":"Augusta"},
-        {"@type":"City","name":"Rosa Brook"},
-        {"@type":"City","name":"Osmington"}
+        {
+          "@type": "City",
+          "name": "Margaret River"
+        },
+        {
+          "@type": "City",
+          "name": "Osmington"
+        },
+        {
+          "@type": "City",
+          "name": "Cowaramup"
+        },
+        {
+          "@type": "City",
+          "name": "Witchcliffe"
+        },
+        {
+          "@type": "City",
+          "name": "Gracetown"
+        },
+        {
+          "@type": "City",
+          "name": "Prevelly"
+        },
+        {
+          "@type": "City",
+          "name": "Gnarabup"
+        },
+        {
+          "@type": "City",
+          "name": "Wilyabrup"
+        },
+        {
+          "@type": "City",
+          "name": "Forest Grove"
+        },
+        {
+          "@type": "City",
+          "name": "Karridale"
+        },
+        {
+          "@type": "City",
+          "name": "Augusta"
+        },
+        {
+          "@type": "City",
+          "name": "Rosa Brook"
+        }
       ],
-      "sameAs": ["https://www.facebook.com/margaretrivertrailerhire"]
+      "sameAs": [
+        "https://www.facebook.com/margaretrivertrailerhire",
+        "https://g.page/r/CaYV_-uiUviZEBI"
+      ]
     },
     {
       "@type": "Service",
@@ -252,7 +300,9 @@
       "serviceType": "Gravel and road base delivery",
       "description": "Driveway gravel, MRD road base, blue metal, cracker dust and rip rap delivered and tipped across the Margaret River region, from trailer loads to 10 tonne truck loads.",
       "url": "https://www.margaretrivertrailerhire.com.au/gravel-road-base-delivery.html",
-      "provider": {"@id": "https://www.margaretrivertrailerhire.com.au/#business"},
+      "provider": {
+        "@id": "https://www.margaretrivertrailerhire.com.au/#business"
+      },
       "areaServed": {
         "@type": "GeoShape",
         "description": "Cowaramup to Augusta, South West Western Australia"
@@ -261,16 +311,105 @@
         "@type": "OfferCatalog",
         "name": "Gravel and road base",
         "itemListElement": [
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Cracked Gravel 5/12/18mm"},"price":"260","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Filter Rock 19-25mm"},"price":"260","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Laterite Fines"},"price":"240","priceCurrency":"AUD","unitText":"per cubic metre"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"MRD Gravel Road Base"},"price":"54","priceCurrency":"AUD","unitText":"per tonne"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"MRD Limestone Road Base"},"price":"56","priceCurrency":"AUD","unitText":"per tonne"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Blue Metal 10-50mm"},"price":"120","priceCurrency":"AUD","unitText":"per tonne"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Blue Metal Road Base"},"price":"90","priceCurrency":"AUD","unitText":"per tonne"},
-          {"@type":"Offer","itemOffered":{"@type":"Product","name":"Cracker Dust / Rip Rap"},"price":"90","priceCurrency":"AUD","unitText":"per tonne"}
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Cracked Gravel 5/12/18mm"
+            },
+            "price": "260",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Filter Rock 19-25mm"
+            },
+            "price": "260",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Laterite Fines"
+            },
+            "price": "240",
+            "priceCurrency": "AUD",
+            "unitText": "per cubic metre"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "MRD Gravel Road Base"
+            },
+            "price": "54",
+            "priceCurrency": "AUD",
+            "unitText": "per tonne"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "MRD Limestone Road Base"
+            },
+            "price": "56",
+            "priceCurrency": "AUD",
+            "unitText": "per tonne"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Blue Metal 10-50mm"
+            },
+            "price": "120",
+            "priceCurrency": "AUD",
+            "unitText": "per tonne"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Blue Metal Road Base"
+            },
+            "price": "90",
+            "priceCurrency": "AUD",
+            "unitText": "per tonne"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Cracker Dust / Rip Rap"
+            },
+            "price": "90",
+            "priceCurrency": "AUD",
+            "unitText": "per tonne"
+          }
         ]
       }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://www.margaretrivertrailerhire.com.au/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Gravel & road base delivery",
+          "item": "https://www.margaretrivertrailerhire.com.au/gravel-road-base-delivery.html"
+        }
+      ]
     }
   ]
 }
